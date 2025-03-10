@@ -15,8 +15,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 
 # Set sources and includes
 set(SOURCES
-        src/main.cpp
-
         # Classes
 
 
@@ -24,25 +22,27 @@ set(SOURCES
 
 
         # Libraries
-
+        lib/gkit3/src/color.cpp
+        lib/gkit3/src/files.cpp
+        lib/gkit3/src/image_io.cpp
+        lib/gkit3/src/mat.cpp
+        lib/gkit3/src/mesh_io.cpp
+        lib/gkit3/src/vec.cpp
 )
 
 set(INCLUDES
         include
 
         # Libraries
-
+        lib/gkit3/src
 )
 
-set(LIBRARIES
+# Executables
+add_executable(Analyse src/analyse.cpp ${SOURCES})
+target_include_directories(Analyse PUBLIC ${INCLUDES})
 
-)
-
-# Executable
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDES})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBRARIES})
+add_executable(Synthese src/synthese.cpp ${SOURCES})
+target_include_directories(Synthese PUBLIC ${INCLUDES})
 
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)

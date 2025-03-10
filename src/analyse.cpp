@@ -1,18 +1,17 @@
 /***************************************************************************************************
- * @file  main.cpp
+ * @file  analyse.cpp
  * @brief Contains the main program of the project
  **************************************************************************************************/
 
 #include <iostream>
-#include <stdexcept>
+#include "image_io.h"
 
 int main() {
-    try {
+    Image puzzle = read_image("data/puzzle.jpg");
 
-    } catch(const std::exception& exception) {
-        std::cerr << "ERROR : " << exception.what() << '\n';
-        return -1;
-    }
+
+
+    write_image(puzzle, "data/processed_puzzle.jpg");
 
     return 0;
 }
