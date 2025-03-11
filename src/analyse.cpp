@@ -119,21 +119,49 @@ int main() {
         }
     }
 
+    puzzle = dilate(puzzle, MathematicalMorphology::Cross);
+    puzzle = dilate(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+    puzzle = dilate(puzzle, MathematicalMorphology::Square);
 
-    puzzle = dilate(puzzle, MathematicalMorphology::Cross);
-    puzzle = dilate(puzzle, MathematicalMorphology::Cross);
-    puzzle = erode(puzzle, MathematicalMorphology::Cross);
-    puzzle = erode(puzzle, MathematicalMorphology::Cross);
-    puzzle = erode(puzzle, MathematicalMorphology::Cross);
-    puzzle = erode(puzzle, MathematicalMorphology::Cross);
-    puzzle = erode(puzzle, MathematicalMorphology::Cross);
-    puzzle = erode(puzzle, MathematicalMorphology::Cross);
-    puzzle = dilate(puzzle, MathematicalMorphology::Square);
-    puzzle = dilate(puzzle, MathematicalMorphology::Square);
-    puzzle = dilate(puzzle, MathematicalMorphology::Square);
-    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+    for(int i = 0 ; i < width ; ++i) {
+        for(int j = 0 ; j < 10 ; ++j) { puzzle(i, j) = White(); }
+        for(int j = height - 10 ; j < height ; ++j) { puzzle(i, j) = White(); }
+    }
+
+    for(int j = 0 ; j < height ; ++j) {
+        for(int i = 0 ; i < 10 ; ++i) { puzzle(i, j) = White(); }
+        for(int i = width - 10 ; i < width ; ++i) { puzzle(i, j) = White(); }
+    }
+
+    for(int i = 1180 ; i <= 1250 ; ++i) {
+        for(int j = 650 ; j <= 700 ; ++j) {
+            puzzle(i, j) = White();
+        }
+    }
 
     write_image_png(puzzle, "data/processed.png", false);
+
+    // Image puzzle_original = read_image("data/puzzle.jpg", false);
+    // Image pieces(puzzle);
+    //
+    // for(int i = 0 ; i < width ; ++i) {
+    //     for(int j = 0 ; j < height ; ++j) {
+    //         if(puzzle(i, j) == Black()) {
+    //             pieces(i, j) = puzzle_original(i, j);
+    //         }
+    //     }
+    // }
+    //
+    // write_image_png(srgb(pieces), "data/only_pieces.png", false);
 
     return 0;
 }
