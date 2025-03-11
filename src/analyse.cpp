@@ -3,31 +3,137 @@
  * @brief Contains the main program of the project
  **************************************************************************************************/
 
+#include <filesystem>
 #include <iostream>
+#include <bits/fs_ops.h>
+
 #include "image_io.h"
 
+bool operator==(const Color& first, const Color& second) {
+    return first.r == second.r && first.g == second.g && first.b == second.b;
+}
+
+bool isValueSimilar(float value, float base, float epsilon) {
+    return value >= base - epsilon && value <= base + epsilon;
+}
+
+bool isColorSimilar(const Color& color, const Color& base, const Color& epsilon) {
+    return isValueSimilar(color.r, base.r, epsilon.r)
+           && isValueSimilar(color.g, base.g, epsilon.g)
+           && isValueSimilar(color.b, base.b, epsilon.b);
+}
+
+namespace MathematicalMorphology {
+    enum StructuringElement : bool {
+        Square,
+        Cross
+    };
+
+    int applyStructuringElement(const Image& image, int x, int y, StructuringElement structuringElement) {
+        const std::pair<int, int>* offsets;
+        int neighbors;
+
+        if(structuringElement) { // Square
+            static constexpr std::pair<int, int> OFFSETS[]{
+                { -1, -1 }, { -1, 0 }, { -1, 1 },
+                { 0, -1 }, { 0, 0 }, { 0, 1 },
+                { 1, -1 }, { 1, 0 }, { 1, 1 },
+            };
+
+            offsets = OFFSETS;
+            neighbors = 9;
+        } else { // Cross
+            static constexpr std::pair<int, int> OFFSETS[]{
+                { -1, 0 }, { 0, -1 }, { 0, 0 }, { 0, 1 }, { 1, 0 }
+            };
+
+            offsets = OFFSETS;
+            neighbors = 4;
+        }
+
+        int n = 0;
+
+        for(int i = 0 ; i < neighbors ; ++i) {
+            if(image(x + offsets[i].first, y + offsets[i].second) == Black()) {
+                ++n;
+            }
+        }
+
+        return n;
+    }
+
+    Image dilate(const Image& image, StructuringElement structuringElement) {
+        Image result(image);
+
+        for(int i = 0 ; i < image.width() ; ++i) {
+            for(int j = 0 ; j < image.height() ; ++j) {
+                if(applyStructuringElement(image, i, j, structuringElement) > 0) {
+                    result(i, j) = Black();
+                }
+            }
+        }
+
+        return result;
+    }
+
+    Image erode(const Image& image, StructuringElement structuringElement) {
+        Image result(image);
+
+        int neighbors = structuringElement ? 9 : 4;
+
+        for(int i = 0 ; i < image.width() ; ++i) {
+            for(int j = 0 ; j < image.height() ; ++j) {
+                if(applyStructuringElement(image, i, j, structuringElement) < neighbors) {
+                    result(i, j) = White();
+                }
+            }
+        }
+
+        return result;
+    }
+}
+
 int main() {
-    Image puzzle = read_image("data/puzzle.jpg");
-    int width = puzzle.width() * 0.8;
+    Image puzzle = read_image("data/puzzle.jpg", false);
+    int width = puzzle.width();
+    int height = puzzle.height();
 
-    Color c(0);
-    int n = 0;
-    for (int i = width ; i < puzzle.width(); ++i) {
-        for (int j = 0; j < puzzle.height(); ++j) {
-            c = c + srgb(puzzle(i, j));
-            ++n;
+    int pixelAmount = 0;
+
+    Color background;
+    for(int i = 1100 ; i < width ; ++i) {
+        for(int j = 0 ; j < 650 ; ++j) {
+            background = background + puzzle(i, j);
+            ++pixelAmount;
         }
     }
 
-    c = c/n;
+    background = background / pixelAmount;
 
-    for (int i = 0 ; i < puzzle.width(); ++i) {
-        for (int j = 0; j < puzzle.height(); ++j) {
-            puzzle(i, j) = c;
+    Color epsilon(0.2f, 0.1f, 0.04f);
+
+    for(int i = 0 ; i < width ; ++i) {
+        for(int j = 0 ; j < height ; ++j) {
+            Color& pixel = puzzle(i, j);
+            pixel = Color(isColorSimilar(pixel, background, epsilon));
         }
     }
 
-    write_image(puzzle, "data/processed_puzzle.jpg");
+
+    puzzle = dilate(puzzle, MathematicalMorphology::Cross);
+    puzzle = dilate(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = erode(puzzle, MathematicalMorphology::Cross);
+    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+
+    write_image_png(puzzle, "data/processed.png", false);
 
     return 0;
 }

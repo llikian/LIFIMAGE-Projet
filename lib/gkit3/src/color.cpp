@@ -115,15 +115,3 @@ Color operator/ ( const Color& c, const float k )
     float kk= 1 / k;
     return kk * c;
 }
-
-void operator+=(Color& left, const Color& right) {
-    left.r += right.r;
-    left.g += right.g;
-    left.b += right.b;
-}
-
-void operator=(Color& color, float scalar) {
-    color.r= scalar;
-    color.g = scalar;
-    color.b= scalar;
-}
