@@ -8,7 +8,6 @@
 #include "Array2D.hpp"
 #include "image_io.h"
 #include "MathematicalMorphology.hpp"
-#include "stb_image_write.h"
 #include "utility.hpp"
 
 int main() {
@@ -71,61 +70,51 @@ int main() {
 
     write_boolean_array_as_grayscale_image("data/binary-mask.png", binaryMask);
 
-    /* Applies the Binary Mask to the Original Image and Writes the Result */
-    // Image puzzle_original = read_image("data/puzzle.jpg", false);
-    // Image only_pieces(puzzle);
-    //
-    // for(int i = 0 ; i < width ; ++i) {
-    //     for(int j = 0 ; j < height ; ++j) {
-    //         if(puzzle(i, j) == Black()) {
-    //             only_pieces(i, j) = puzzle_original(i, j);
-    //         }
-    //     }
-    // }
-    //
-    // write_image_png(srgb(only_pieces), "data/only_pieces.png", false);
-
     /* ---- Labeling ---- */
     Array2D<int> labels(width, height);
     std::unordered_map<int, int> closures;
     int maxLabel = 0;
 
     static constexpr std::pair<int, int> OFFSETS[]{ { -1, -1 }, { 0, -1 }, { 1, -1 }, { -1, 0 } };
+    int neighborLabels[4];
+    unsigned int neighbors;
 
     // First Pass : Initial Labeling
-    for(int i = 0 ; i < width ; ++i) {
-        for(int j = 0 ; j < height ; ++j) {
+    for(int j = 0 ; j < height ; ++j) {
+        for(int i = 0 ; i < width ; ++i) {
             if(binaryMask(i, j)) { continue; }
 
-            std::vector<int> foundLabels;
+            neighbors = 0;
 
             for(auto [offsetX, offsetY] : OFFSETS) {
-                int x = i + offsetX;
-                int y = j + offsetY;
+                unsigned int x = i + offsetX;
+                unsigned int y = j + offsetY;
 
-                if(x < 0 || y < 0 || x >= width) { continue; }
+                if(x >= width || y >= height) { continue; }
 
                 int value = labels(x, y);
                 if(value > 0) {
-                    foundLabels.emplace_back(value);
+                    neighborLabels[neighbors++] = value;
                 }
             }
 
-            if(foundLabels.empty()) {
+            if(neighbors == 0) {
                 labels(i, j) = maxLabel++;
+            } else if(neighbors == 1) {
+                labels(i, j) = neighborLabels[0];
             } else {
-                int min = foundLabels.at(0);
-                for(unsigned int k = 1 ; k < foundLabels.size() ; ++k) {
-                    if(foundLabels.at(k) < min) {
-                        min = foundLabels.at(k);
+                int min = neighborLabels[0];
+                for(unsigned int k = 1 ; k < neighbors ; ++k) {
+                    if(neighborLabels[k] < min) {
+                        min = neighborLabels[k];
                     }
                 }
 
                 labels(i, j) = min;
 
-                for(int label : foundLabels) {
-                    if(label != min) {
-                        closures[label] = min;
+                for(unsigned int k = 0 ; k < neighbors ; ++k) {
+                    if(neighborLabels[k] != min) {
+                        closures[neighborLabels[k]] = min;
                     }
                 }
             }

@@ -63,5 +63,6 @@ void write_boolean_array_as_grayscale_image(const std::string& path, const Array
         }
     }
 
+    stbi_flip_vertically_on_write(false);
     stbi_write_png(path.c_str(), data.rows, data.columns, 1, temp.data(), 0);
 }
