@@ -5,92 +5,11 @@
 
 #include <iostream>
 #include <unordered_set>
+#include "Array2D.hpp"
 #include "image_io.h"
+#include "MathematicalMorphology.hpp"
+#include "stb_image_write.h"
 #include "utility.hpp"
-
-bool operator==(const Color& first, const Color& second) {
-    return first.r == second.r && first.g == second.g && first.b == second.b;
-}
-
-bool isValueSimilar(float value, float base, float epsilon) {
-    return value >= base - epsilon && value <= base + epsilon;
-}
-
-bool isColorSimilar(const Color& color, const Color& base, const Color& epsilon) {
-    return isValueSimilar(color.r, base.r, epsilon.r)
-           && isValueSimilar(color.g, base.g, epsilon.g)
-           && isValueSimilar(color.b, base.b, epsilon.b);
-}
-
-namespace MathematicalMorphology {
-    enum StructuringElement : bool {
-        Square = true,
-        Cross  = false
-    };
-
-    int applyStructuringElement(const Image& image, int x, int y, StructuringElement structuringElement) {
-        const std::pair<int, int>* offsets;
-        int neighbors;
-
-        if(structuringElement) { // Square
-            static constexpr std::pair<int, int> OFFSETS[]{
-                { -1, -1 }, { -1, 0 }, { -1, 1 },
-                { 0, -1 }, { 0, 0 }, { 0, 1 },
-                { 1, -1 }, { 1, 0 }, { 1, 1 },
-            };
-
-            offsets = OFFSETS;
-            neighbors = 9;
-        } else { // Cross
-            static constexpr std::pair<int, int> OFFSETS[]{
-                { -1, 0 }, { 0, -1 }, { 0, 0 }, { 0, 1 }, { 1, 0 }
-            };
-
-            offsets = OFFSETS;
-            neighbors = 4;
-        }
-
-        int n = 0;
-
-        for(int i = 0 ; i < neighbors ; ++i) {
-            if(image(x + offsets[i].first, y + offsets[i].second) == Black()) {
-                ++n;
-            }
-        }
-
-        return n;
-    }
-
-    Image dilate(const Image& image, StructuringElement structuringElement) {
-        Image result(image);
-
-        for(int i = 0 ; i < image.width() ; ++i) {
-            for(int j = 0 ; j < image.height() ; ++j) {
-                if(applyStructuringElement(image, i, j, structuringElement) > 0) {
-                    result(i, j) = Black();
-                }
-            }
-        }
-
-        return result;
-    }
-
-    Image erode(const Image& image, StructuringElement structuringElement) {
-        Image result(image);
-
-        int neighbors = structuringElement ? 9 : 4;
-
-        for(int i = 0 ; i < image.width() ; ++i) {
-            for(int j = 0 ; j < image.height() ; ++j) {
-                if(applyStructuringElement(image, i, j, structuringElement) < neighbors) {
-                    result(i, j) = White();
-                }
-            }
-        }
-
-        return result;
-    }
-}
 
 int main() {
     Image puzzle = read_image("data/puzzle.jpg", false);
@@ -111,45 +30,45 @@ int main() {
     background = background / pixelAmount;
 
     /* ---- Thresholding ---- */
+    Array2D<bool> binaryMask(width, height);
     Color epsilon(0.2f, 0.1f, 0.04f);
 
     for(int i = 0 ; i < width ; ++i) {
         for(int j = 0 ; j < height ; ++j) {
-            Color& pixel = puzzle(i, j);
-            pixel = Color(isColorSimilar(pixel, background, epsilon));
+            binaryMask(i, j) = isColorSimilar(puzzle(i, j), background, epsilon);
         }
     }
 
+    write_boolean_array_as_grayscale("data/binary-mask.png", binaryMask);
+
     /* ---- Erase Little Bits and Fill Holes ---- */
-    puzzle = dilate(puzzle, MathematicalMorphology::Square);
-    puzzle = dilate(puzzle, MathematicalMorphology::Square);
-    puzzle = dilate(puzzle, MathematicalMorphology::Cross);
-    puzzle = erode(puzzle, MathematicalMorphology::Square);
-    puzzle = erode(puzzle, MathematicalMorphology::Square);
-    puzzle = erode(puzzle, MathematicalMorphology::Square);
-    puzzle = erode(puzzle, MathematicalMorphology::Square);
-    puzzle = erode(puzzle, MathematicalMorphology::Square);
-    puzzle = erode(puzzle, MathematicalMorphology::Cross);
-    puzzle = dilate(puzzle, MathematicalMorphology::Square);
+    binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
+    binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
+    binaryMask = dilate(binaryMask, MathematicalMorphology::Cross);
+    binaryMask = erode(binaryMask, MathematicalMorphology::Square);
+    binaryMask = erode(binaryMask, MathematicalMorphology::Square);
+    binaryMask = erode(binaryMask, MathematicalMorphology::Square);
+    binaryMask = erode(binaryMask, MathematicalMorphology::Square);
+    binaryMask = erode(binaryMask, MathematicalMorphology::Square);
+    binaryMask = erode(binaryMask, MathematicalMorphology::Cross);
+    binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
 
     /* ---- Erase the Borders of the Image and the Logo ---- */
     for(int i = 0 ; i < width ; ++i) {
-        for(int j = 0 ; j < 20 ; ++j) { puzzle(i, j) = White(); }
-        for(int j = height - 20 ; j < height ; ++j) { puzzle(i, j) = White(); }
+        for(int j = 0 ; j < 20 ; ++j) { binaryMask(i, j) = 0; }
+        for(int j = height - 20 ; j < height ; ++j) { binaryMask(i, j) = 0; }
     }
 
     for(int j = 0 ; j < height ; ++j) {
-        for(int i = 0 ; i < 20 ; ++i) { puzzle(i, j) = White(); }
-        for(int i = width - 20 ; i < width ; ++i) { puzzle(i, j) = White(); }
+        for(int i = 0 ; i < 20 ; ++i) { binaryMask(i, j) = 0; }
+        for(int i = width - 20 ; i < width ; ++i) { binaryMask(i, j) = 0; }
     }
 
     for(int i = 1180 ; i <= 1250 ; ++i) {
         for(int j = 650 ; j <= 700 ; ++j) {
-            puzzle(i, j) = White();
+            binaryMask(i, j) = 0;
         }
     }
-
-    write_image_png(puzzle, "data/binary-mask.png", false);
 
     /* Applies the Binary Mask to the Original Image and Writes the Result */
     // Image puzzle_original = read_image("data/puzzle.jpg", false);
@@ -166,18 +85,16 @@ int main() {
     // write_image_png(srgb(only_pieces), "data/only_pieces.png", false);
 
     /* ---- Labeling ---- */
-    std::vector<int> labels(width * height);
+    Array2D<int> labels(width, height);
     std::unordered_map<int, int> closures;
     int maxLabel = 0;
 
-    auto index = [&width](int x, int y) { return y * width + x; };
-
-    static constexpr std::pair<int, int> OFFSETS[]{ { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, -1 } };
+    static constexpr std::pair<int, int> OFFSETS[]{ { -1, -1 }, { 0, -1 }, { 1, -1 }, { -1, 0 } };
 
     // First Pass : Initial Labeling
     for(int i = 0 ; i < width ; ++i) {
         for(int j = 0 ; j < height ; ++j) {
-            if(puzzle(i, j).r == 1.0f) { continue; }
+            if(binaryMask(i, j)) { continue; }
 
             std::vector<int> foundLabels;
 
@@ -187,14 +104,14 @@ int main() {
 
                 if(x < 0 || y < 0 || x >= width) { continue; }
 
-                int value = labels[index(x, y)];
+                int value = labels(x, y);
                 if(value > 0) {
                     foundLabels.emplace_back(value);
                 }
             }
 
             if(foundLabels.empty()) {
-                labels[index(i, j)] = maxLabel++;
+                labels(i, j) = maxLabel++;
             } else {
                 int min = foundLabels.at(0);
                 for(unsigned int k = 1 ; k < foundLabels.size() ; ++k) {
@@ -203,7 +120,7 @@ int main() {
                     }
                 }
 
-                labels[index(i, j)] = min;
+                labels(i, j) = min;
 
                 for(int label : foundLabels) {
                     if(label != min) {
@@ -216,16 +133,20 @@ int main() {
 
     // Second Pass : Transitive Closures
     std::unordered_map<int, Color> labelColors;
-    for(int& label : labels) {
-        int closure = label;
+    for(int i = 0 ; i < width ; ++i) {
+        for(int j = 0 ; j < height ; ++j) {
+            int& label = labels(i, j);
 
-        while(closures.contains(closure)) {
-            closure = closures.at(closure);
-        }
+            int closure = label;
 
-        label = closure;
-        if(!labelColors.contains(label)) {
-            labelColors.emplace(label, Color(random(0.0f, 1.0f), random(0.0f, 1.0f), random(0.0f, 1.0f)));
+            while(closures.contains(closure)) {
+                closure = closures.at(closure);
+            }
+
+            label = closure;
+            if(!labelColors.contains(label)) {
+                labelColors.emplace(label, Color(random(0.0f, 1.0f), random(0.0f, 1.0f), random(0.0f, 1.0f)));
+            }
         }
     }
 
@@ -233,9 +154,8 @@ int main() {
 
     for(int i = 0 ; i < width ; ++i) {
         for(int j = 0 ; j < height ; ++j) {
-            const Color& pixel = puzzle(i, j);
-            if(pixel.r == 0.0f) {
-                puzzle(i, j) = labelColors.at(labels.at(index(i, j)));
+            if(!binaryMask(i, j)) {
+                puzzle(i, j) = labelColors.at(labels(i, j));
             } else {
                 puzzle(i, j) = Black();
             }
