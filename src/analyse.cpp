@@ -39,7 +39,6 @@ int main() {
         }
     }
 
-    write_boolean_array_as_grayscale("data/binary-mask.png", binaryMask);
 
     /* ---- Erase Little Bits and Fill Holes ---- */
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
@@ -55,20 +54,22 @@ int main() {
 
     /* ---- Erase the Borders of the Image and the Logo ---- */
     for(int i = 0 ; i < width ; ++i) {
-        for(int j = 0 ; j < 20 ; ++j) { binaryMask(i, j) = 0; }
-        for(int j = height - 20 ; j < height ; ++j) { binaryMask(i, j) = 0; }
+        for(int j = 0 ; j < 20 ; ++j) { binaryMask(i, j) = 1; }
+        for(int j = height - 20 ; j < height ; ++j) { binaryMask(i, j) = 1; }
     }
 
     for(int j = 0 ; j < height ; ++j) {
-        for(int i = 0 ; i < 20 ; ++i) { binaryMask(i, j) = 0; }
-        for(int i = width - 20 ; i < width ; ++i) { binaryMask(i, j) = 0; }
+        for(int i = 0 ; i < 20 ; ++i) { binaryMask(i, j) = 1; }
+        for(int i = width - 20 ; i < width ; ++i) { binaryMask(i, j) = 1; }
     }
 
     for(int i = 1180 ; i <= 1250 ; ++i) {
         for(int j = 650 ; j <= 700 ; ++j) {
-            binaryMask(i, j) = 0;
+            binaryMask(i, j) = 1;
         }
     }
+
+    write_boolean_array_as_grayscale_image("data/binary-mask.png", binaryMask);
 
     /* Applies the Binary Mask to the Original Image and Writes the Result */
     // Image puzzle_original = read_image("data/puzzle.jpg", false);

@@ -54,7 +54,7 @@ bool isColorSimilar(const Color& color, const Color& base, const Color& epsilon)
            && isValueSimilar(color.b, base.b, epsilon.b);
 }
 
-void write_boolean_array_as_grayscale(const std::string& path, const Array2D<bool>& data) {
+void write_boolean_array_as_grayscale_image(const std::string& path, const Array2D<bool>& data) {
     std::vector<unsigned char> temp;
 
     for(unsigned int i = 0 ; i < data.columns ; ++i) {

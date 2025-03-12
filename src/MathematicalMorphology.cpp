@@ -50,9 +50,7 @@ Array2D<bool> MathematicalMorphology::dilate(const Array2D<bool>& data, Structur
 
     for(unsigned int i = 0 ; i < data.rows ; ++i) {
         for(unsigned int j = 0 ; j < data.columns ; ++j) {
-            if(applyStructuringElement(data, i, j, structuringElement) > 0) {
-                result(i, j) = 0;
-            }
+            result(i, j) = applyStructuringElement(data, i, j, structuringElement) == 0;
         }
     }
 
@@ -66,9 +64,7 @@ Array2D<bool> MathematicalMorphology::erode(const Array2D<bool>& data, Structuri
 
     for(unsigned int i = 0 ; i < data.rows ; ++i) {
         for(unsigned int j = 0 ; j < data.columns ; ++j) {
-            if(applyStructuringElement(data, i, j, structuringElement) < neighbors) {
-                result(i, j) = 1;
-            }
+            result(i, j) = applyStructuringElement(data, i, j, structuringElement) < neighbors;
         }
     }
 

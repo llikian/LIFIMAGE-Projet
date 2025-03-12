@@ -24,4 +24,4 @@ bool operator==(const Color& first, const Color& second);
 bool isValueSimilar(float value, float base, float epsilon);
 bool isColorSimilar(const Color& color, const Color& base, const Color& epsilon);
 
-void write_boolean_array_as_grayscale(const std::string& path, const Array2D<bool>& data);
+void write_boolean_array_as_grayscale_image(const std::string& path, const Array2D<bool>& data);
