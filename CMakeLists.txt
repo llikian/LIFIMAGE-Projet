@@ -19,7 +19,7 @@ set(SOURCES
 
 
         # Other Sources
-
+        src/utility.cpp
 
         # Libraries
         lib/gkit3/src/color.cpp
