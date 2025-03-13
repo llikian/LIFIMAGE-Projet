@@ -10,6 +10,13 @@
 #include "MathematicalMorphology.hpp"
 #include "utility.hpp"
 
+struct MinMaxPos {
+    unsigned int minX{-1u};
+    unsigned int minY{-1u};
+    unsigned int maxX{0u};
+    unsigned int maxY{0u};
+};
+
 int main() {
     Image puzzle = read_image("data/puzzle.jpg", false);
     int width = puzzle.width();
@@ -19,8 +26,8 @@ int main() {
     int pixelAmount = 0;
 
     Color background;
-    for(int i = 1100 ; i < width ; ++i) {
-        for(int j = 0 ; j < 650 ; ++j) {
+    for(int j = 0 ; j < 650 ; ++j) {
+        for(int i = 1100 ; i < width ; ++i) {
             background = background + puzzle(i, j);
             ++pixelAmount;
         }
@@ -32,14 +39,13 @@ int main() {
     Array2D<bool> binaryMask(width, height);
     Color epsilon(0.2f, 0.1f, 0.04f);
 
-    for(int i = 0 ; i < width ; ++i) {
-        for(int j = 0 ; j < height ; ++j) {
+    for(int j = 0 ; j < height ; ++j) {
+        for(int i = 0 ; i < width ; ++i) {
             binaryMask(i, j) = isColorSimilar(puzzle(i, j), background, epsilon);
         }
     }
 
-
-    /* ---- Erase Little Bits and Fill Holes ---- */
+    // Erase Little Bits and Fill Holes
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
     binaryMask = dilate(binaryMask, MathematicalMorphology::Cross);
@@ -51,7 +57,7 @@ int main() {
     binaryMask = erode(binaryMask, MathematicalMorphology::Cross);
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
 
-    /* ---- Erase the Borders of the Image and the Logo ---- */
+    // Erase the Borders of the Image and the Logo
     for(int i = 0 ; i < width ; ++i) {
         for(int j = 0 ; j < 20 ; ++j) { binaryMask(i, j) = 1; }
         for(int j = height - 20 ; j < height ; ++j) { binaryMask(i, j) = 1; }
@@ -62,8 +68,8 @@ int main() {
         for(int i = width - 20 ; i < width ; ++i) { binaryMask(i, j) = 1; }
     }
 
-    for(int i = 1180 ; i <= 1250 ; ++i) {
-        for(int j = 650 ; j <= 700 ; ++j) {
+    for(int j = 650 ; j <= 700 ; ++j) {
+        for(int i = 1180 ; i <= 1250 ; ++i) {
             binaryMask(i, j) = 1;
         }
     }
@@ -73,11 +79,18 @@ int main() {
     /* ---- Labeling ---- */
     Array2D<int> labels(width, height);
     std::unordered_map<int, int> closures;
-    int maxLabel = 0;
+    int maxLabel = 1;
 
-    static constexpr std::pair<int, int> OFFSETS[]{ { -1, -1 }, { 0, -1 }, { 1, -1 }, { -1, 0 } };
     int neighborLabels[4];
     unsigned int neighbors;
+    auto checkOffset = [&width, &height, &labels, &neighborLabels, &neighbors](unsigned int x, unsigned int y) {
+        if(x >= width || y >= height) { return; }
+
+        int value = labels(x, y);
+        if(value > 0) {
+            neighborLabels[neighbors++] = value;
+        }
+    };
 
     // First Pass : Initial Labeling
     for(int j = 0 ; j < height ; ++j) {
@@ -86,17 +99,10 @@ int main() {
 
             neighbors = 0;
 
-            for(auto [offsetX, offsetY] : OFFSETS) {
-                unsigned int x = i + offsetX;
-                unsigned int y = j + offsetY;
-
-                if(x >= width || y >= height) { continue; }
-
-                int value = labels(x, y);
-                if(value > 0) {
-                    neighborLabels[neighbors++] = value;
-                }
-            }
+            checkOffset(i - 1, j - 1);
+            checkOffset(i, j - 1);
+            checkOffset(i + 1, j - 1);
+            checkOffset(i - 1, j);
 
             if(neighbors == 0) {
                 labels(i, j) = maxLabel++;
@@ -123,8 +129,10 @@ int main() {
 
     // Second Pass : Transitive Closures
     std::unordered_map<int, Color> labelColors;
-    for(int i = 0 ; i < width ; ++i) {
-        for(int j = 0 ; j < height ; ++j) {
+    std::unordered_map<int, MinMaxPos> labelPositions;
+
+    for(int j = 0 ; j < height ; ++j) {
+        for(int i = 0 ; i < width ; ++i) {
             int& label = labels(i, j);
 
             int closure = label;
@@ -134,25 +142,45 @@ int main() {
             }
 
             label = closure;
-            if(!labelColors.contains(label)) {
-                labelColors.emplace(label, Color(random(0.0f, 1.0f), random(0.0f, 1.0f), random(0.0f, 1.0f)));
+            if(label > 0) {
+                if(i < labelPositions[label].minX) { labelPositions[label].minX = i; }
+                if(j < labelPositions[label].minY) { labelPositions[label].minY = j; }
+                if(i > labelPositions[label].maxX) { labelPositions[label].maxX = i; }
+                if(j > labelPositions[label].maxY) { labelPositions[label].maxY = j; }
+
+                if(!labelColors.contains(label)) {
+                    labelColors.emplace(label, Color(random(0.0f, 1.0f), random(0.0f, 1.0f), random(0.0f, 1.0f)));
+                }
             }
         }
     }
 
-    std::cout << "There are " << labelColors.size() << " unique labels \n";
+    std::cout << "There are " << labelColors.size() << " unique labels:\n";
+    for(const auto& [label, _] : labelColors) {
+        std::cout << label << ' ';
+    }
+    std::cout << '\n';
 
-    for(int i = 0 ; i < width ; ++i) {
-        for(int j = 0 ; j < height ; ++j) {
-            if(!binaryMask(i, j)) {
-                puzzle(i, j) = labelColors.at(labels(i, j));
-            } else {
-                puzzle(i, j) = Black();
-            }
+    for(int j = 0 ; j < height ; ++j) {
+        for(int i = 0 ; i < width ; ++i) {
+            puzzle(i, j) = binaryMask(i, j) ? Black() : labelColors.at(labels(i, j));
         }
     }
 
     write_image_png(srgb(puzzle), "data/labels.png", false);
+
+    /* ---- Extract Pieces ---- */
+    for(const auto& [label, position] : labelPositions) {
+        Image piece(position.maxX - position.minX, position.maxY - position.minY);
+
+        for(int j = 0 ; j < piece.height() ; ++j) {
+            for(int i = 0 ; i < piece.width() ; ++i) {
+                piece(i, j) = puzzle(i + position.minX, j + position.minY);
+            }
+        }
+
+        write_image_png(srgb(piece), ("data/pieces/piece-" + std::to_string(label) + ".png").c_str(), false);
+    }
 
     return 0;
 }
