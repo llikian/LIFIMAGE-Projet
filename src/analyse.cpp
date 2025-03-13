@@ -172,16 +172,17 @@ int main() {
 
     /* ---- Extract Pieces ---- */
     for(const auto& [label, position] : labelPositions) {
+        unsigned int padding = 10;
         unsigned int w = position.maxX - position.minX;
         unsigned int h = position.maxY - position.minY;
 
-        Image piece(w, h);
-        Image piece_mask(w, h);
+        Image piece(w + 2 * padding, h + 2 * padding, background);
+        Image piece_mask(w + 2 * padding, h + 2 * padding, White());
 
         for(int j = 0 ; j < h ; ++j) {
             for(int i = 0 ; i < w ; ++i) {
-                piece(i, j) = puzzle(i + position.minX, j + position.minY);
-                piece_mask(i, j) = Color(!binaryMask(i + position.minX, j + position.minY));
+                piece(i + padding, j + padding) = puzzle(i + position.minX, j + position.minY);
+                piece_mask(i + padding, j + padding) = Color(binaryMask(i + position.minX, j + position.minY));
             }
         }
 
