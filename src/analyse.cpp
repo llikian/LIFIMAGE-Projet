@@ -4,7 +4,7 @@
  **************************************************************************************************/
 
 #include <iostream>
-#include <unordered_set>
+#include <unordered_map>
 #include "Array2D.hpp"
 #include "image_io.h"
 #include "MathematicalMorphology.hpp"
