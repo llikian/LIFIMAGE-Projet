@@ -161,25 +161,32 @@ int main() {
     }
     std::cout << '\n';
 
+    Image labels_img(width, height);
     for(int j = 0 ; j < height ; ++j) {
         for(int i = 0 ; i < width ; ++i) {
-            puzzle(i, j) = binaryMask(i, j) ? Black() : labelColors.at(labels(i, j));
+            labels_img(i, j) = binaryMask(i, j) ? Black() : labelColors.at(labels(i, j));
         }
     }
 
-    write_image_png(srgb(puzzle), "data/labels.png", false);
+    write_image_png(srgb(labels_img), "data/labels.png", false);
 
     /* ---- Extract Pieces ---- */
     for(const auto& [label, position] : labelPositions) {
-        Image piece(position.maxX - position.minX, position.maxY - position.minY);
+        unsigned int w = position.maxX - position.minX;
+        unsigned int h = position.maxY - position.minY;
 
-        for(int j = 0 ; j < piece.height() ; ++j) {
-            for(int i = 0 ; i < piece.width() ; ++i) {
+        Image piece(w, h);
+        Image piece_mask(w, h);
+
+        for(int j = 0 ; j < h ; ++j) {
+            for(int i = 0 ; i < w ; ++i) {
                 piece(i, j) = puzzle(i + position.minX, j + position.minY);
+                piece_mask(i, j) = Color(!binaryMask(i + position.minX, j + position.minY));
             }
         }
 
         write_image_png(srgb(piece), ("data/pieces/piece-" + std::to_string(label) + ".png").c_str(), false);
+        write_image_png(srgb(piece_mask), ("data/piece-masks/piece-mask-" + std::to_string(label) + ".png").c_str(), false);
     }
 
     return 0;
