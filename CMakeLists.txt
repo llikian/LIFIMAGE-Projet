@@ -1,9 +1,6 @@
 # Global Project Configuration
 cmake_minimum_required(VERSION 3.26)
-project(Projet-Analyse)
-
-# Find packages
-
+project(LIFIMAGE-Projet)
 
 # Compiler options
 set(CMAKE_CXX_STANDARD 23)
@@ -17,9 +14,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 set(SOURCES
         # Classes
         include/Array2D.hpp
-
-        # Namespaces
-        src/MathematicalMorphology.cpp
 
         # Other Sources
         src/utility.cpp
@@ -41,10 +35,15 @@ set(INCLUDES
 )
 
 # Executables
-add_executable(Analyse src/analyse.cpp ${SOURCES})
+add_executable(Analyse src/analyse.cpp
+        ${SOURCES}
+        src/MathematicalMorphology.cpp
+)
 target_include_directories(Analyse PUBLIC ${INCLUDES})
 
-add_executable(Synthese src/synthese.cpp ${SOURCES})
+add_executable(Synthese src/synthese.cpp
+        ${SOURCES}
+)
 target_include_directories(Synthese PUBLIC ${INCLUDES})
 
 # Set output directories

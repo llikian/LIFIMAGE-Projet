@@ -13,7 +13,7 @@ namespace MathematicalMorphology {
         Cross  = false
     };
 
-    constexpr int neighborsAmount(StructuringElement structuringElement) { return structuringElement ? 9 : 4; }
+    constexpr int neighborsAmount(StructuringElement structuringElement) { return structuringElement ? 9 : 5; }
 
     int applyStructuringElement(const Array2D<bool>& data, int x, int y, StructuringElement structuringElement);
 

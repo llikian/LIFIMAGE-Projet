@@ -7,45 +7,31 @@
 
 #include <utility>
 
-int MathematicalMorphology::applyStructuringElement(const Array2D<bool>& data, int x, int y, StructuringElement structuringElement) {
-    const std::pair<int, int>* offsets;
-    int neighbors;
-
-    if(structuringElement) { // Square
-        static constexpr std::pair<int, int> OFFSETS[]{
-            { -1, -1 }, { -1, 0 }, { -1, 1 },
-            { 0, -1 }, { 0, 0 }, { 0, 1 },
-            { 1, -1 }, { 1, 0 }, { 1, 1 },
-        };
-
-        offsets = OFFSETS;
-        neighbors = 9;
-    } else { // Cross
-        static constexpr std::pair<int, int> OFFSETS[]{
-            { -1, 0 }, { 0, -1 }, { 0, 0 }, { 0, 1 }, { 1, 0 }
-        };
-
-        offsets = OFFSETS;
-        neighbors = 4;
-    }
+int MathematicalMorphology::applyStructuringElement(const Array2D<bool>& data, int x, int y,
+                                                    StructuringElement structuringElement) {
+    static constexpr std::pair<int, int> offsets[9]{
+        /* Offsets Present for Both the Square and the Cross */
+        { -1, 0 }, { 0, -1 }, { 0, 0 }, { 0, 1 }, { 1, 0 },
+        /* Offsets Only Present for the Square */
+        { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 }
+    };
 
     unsigned int n = 0;
 
-    for(int i = 0 ; i < neighbors ; ++i) {
+    for(int i = 0 ; i < neighborsAmount(structuringElement) ; ++i) {
         unsigned int offsetX = x + offsets[i].first;
         unsigned int offsetY = y + offsets[i].second;
 
         if(offsetX >= data.rows || offsetY >= data.columns) { continue; }
 
-        if(data(offsetX, offsetY) == 0) {
-            ++n;
-        }
+        if(data(offsetX, offsetY) == 0) { ++n; }
     }
 
     return n;
 }
 
-Array2D<bool> MathematicalMorphology::dilate(const Array2D<bool>& data, StructuringElement structuringElement) {
+Array2D<bool> MathematicalMorphology::dilate(const Array2D<bool>& data,
+                                             StructuringElement structuringElement) {
     Array2D<bool> result(data.rows, data.columns);
 
     for(unsigned int i = 0 ; i < data.rows ; ++i) {
@@ -57,7 +43,8 @@ Array2D<bool> MathematicalMorphology::dilate(const Array2D<bool>& data, Structur
     return result;
 }
 
-Array2D<bool> MathematicalMorphology::erode(const Array2D<bool>& data, StructuringElement structuringElement) {
+Array2D<bool> MathematicalMorphology::erode(const Array2D<bool>& data,
+                                            StructuringElement structuringElement) {
     Array2D<bool> result(data.rows, data.columns);
 
     int neighbors = neighborsAmount(structuringElement);
