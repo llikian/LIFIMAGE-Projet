@@ -3,6 +3,7 @@
  * @brief Contains the main program of the project
  **************************************************************************************************/
 
+#include <filesystem>
 #include <iostream>
 #include <unordered_map>
 #include "Array2D.hpp"
@@ -54,6 +55,7 @@ int main() {
     binaryMask = erode(binaryMask, MathematicalMorphology::Square);
     binaryMask = erode(binaryMask, MathematicalMorphology::Square);
     binaryMask = erode(binaryMask, MathematicalMorphology::Square);
+    binaryMask = erode(binaryMask, MathematicalMorphology::Cross);
     binaryMask = erode(binaryMask, MathematicalMorphology::Cross);
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
 
@@ -171,6 +173,9 @@ int main() {
     write_image_png(srgb(labels_img), "data/labels.png", false);
 
     /* ---- Extract Pieces ---- */
+    std::filesystem::create_directory("data/pieces");
+    std::filesystem::create_directory("data/piece-masks");
+
     for(const auto& [label, position] : labelPositions) {
         unsigned int padding = 10;
         unsigned int w = position.maxX - position.minX;
