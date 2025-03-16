@@ -20,15 +20,15 @@ struct MinMaxPos {
 
 int main() {
     Image puzzle = read_image("data/puzzle.jpg", false);
-    int width = puzzle.width();
-    int height = puzzle.height();
+    unsigned int width = puzzle.width();
+    unsigned int height = puzzle.height();
 
     /* ---- Get Background Color ---- */
-    int pixelAmount = 0;
+    unsigned int pixelAmount = 0;
 
     Color background;
-    for(int j = 0 ; j < 650 ; ++j) {
-        for(int i = 1100 ; i < width ; ++i) {
+    for(unsigned int j = 0 ; j < 650 ; ++j) {
+        for(unsigned int i = 1100 ; i < width ; ++i) {
             background = background + puzzle(i, j);
             ++pixelAmount;
         }
@@ -40,8 +40,8 @@ int main() {
     Array2D<bool> binaryMask(width, height);
     Color epsilon(0.2f, 0.1f, 0.04f);
 
-    for(int j = 0 ; j < height ; ++j) {
-        for(int i = 0 ; i < width ; ++i) {
+    for(unsigned int j = 0 ; j < height ; ++j) {
+        for(unsigned int i = 0 ; i < width ; ++i) {
             binaryMask(i, j) = isColorSimilar(puzzle(i, j), background, epsilon);
         }
     }
@@ -60,18 +60,18 @@ int main() {
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
 
     // Erase the Borders of the Image and the Logo
-    for(int i = 0 ; i < width ; ++i) {
-        for(int j = 0 ; j < 20 ; ++j) { binaryMask(i, j) = 1; }
-        for(int j = height - 20 ; j < height ; ++j) { binaryMask(i, j) = 1; }
+    for(unsigned int i = 0 ; i < width ; ++i) {
+        for(unsigned int j = 0 ; j < 20 ; ++j) { binaryMask(i, j) = 1; }
+        for(unsigned int j = height - 20 ; j < height ; ++j) { binaryMask(i, j) = 1; }
     }
 
-    for(int j = 0 ; j < height ; ++j) {
-        for(int i = 0 ; i < 20 ; ++i) { binaryMask(i, j) = 1; }
-        for(int i = width - 20 ; i < width ; ++i) { binaryMask(i, j) = 1; }
+    for(unsigned int j = 0 ; j < height ; ++j) {
+        for(unsigned int i = 0 ; i < 20 ; ++i) { binaryMask(i, j) = 1; }
+        for(unsigned int i = width - 20 ; i < width ; ++i) { binaryMask(i, j) = 1; }
     }
 
-    for(int j = 650 ; j <= 700 ; ++j) {
-        for(int i = 1180 ; i <= 1250 ; ++i) {
+    for(unsigned int j = 650 ; j <= 700 ; ++j) {
+        for(unsigned int i = 1180 ; i <= 1250 ; ++i) {
             binaryMask(i, j) = 1;
         }
     }
@@ -79,24 +79,24 @@ int main() {
     write_boolean_array_as_grayscale_image("data/binary-mask.png", binaryMask);
 
     /* ---- Labeling ---- */
-    Array2D<int> labels(width, height);
-    std::unordered_map<int, int> closures;
-    int maxLabel = 1;
+    Array2D<unsigned int> labels(width, height);
+    std::unordered_map<unsigned int, unsigned int> closures;
+    unsigned int maxLabel = 1;
 
-    int neighborLabels[4];
+    unsigned int neighborLabels[4];
     unsigned int neighbors;
     auto checkOffset = [&width, &height, &labels, &neighborLabels, &neighbors](unsigned int x, unsigned int y) {
         if(x >= width || y >= height) { return; }
 
-        int value = labels(x, y);
+        unsigned int value = labels(x, y);
         if(value > 0) {
             neighborLabels[neighbors++] = value;
         }
     };
 
     // First Pass : Initial Labeling
-    for(int j = 0 ; j < height ; ++j) {
-        for(int i = 0 ; i < width ; ++i) {
+    for(unsigned int j = 0 ; j < height ; ++j) {
+        for(unsigned int i = 0 ; i < width ; ++i) {
             if(binaryMask(i, j)) { continue; }
 
             neighbors = 0;
@@ -111,7 +111,7 @@ int main() {
             } else if(neighbors == 1) {
                 labels(i, j) = neighborLabels[0];
             } else {
-                int min = neighborLabels[0];
+                unsigned int min = neighborLabels[0];
                 for(unsigned int k = 1 ; k < neighbors ; ++k) {
                     if(neighborLabels[k] < min) {
                         min = neighborLabels[k];
@@ -130,14 +130,14 @@ int main() {
     }
 
     // Second Pass : Transitive Closures
-    std::unordered_map<int, Color> labelColors;
-    std::unordered_map<int, MinMaxPos> labelPositions;
+    std::unordered_map<unsigned int, Color> labelColors;
+    std::unordered_map<unsigned int, MinMaxPos> labelPositions;
 
-    for(int j = 0 ; j < height ; ++j) {
-        for(int i = 0 ; i < width ; ++i) {
-            int& label = labels(i, j);
+    for(unsigned int j = 0 ; j < height ; ++j) {
+        for(unsigned int i = 0 ; i < width ; ++i) {
+            unsigned int& label = labels(i, j);
 
-            int closure = label;
+            unsigned int closure = label;
 
             while(closures.contains(closure)) {
                 closure = closures.at(closure);
@@ -164,8 +164,8 @@ int main() {
     std::cout << '\n';
 
     Image labels_img(width, height);
-    for(int j = 0 ; j < height ; ++j) {
-        for(int i = 0 ; i < width ; ++i) {
+    for(unsigned int j = 0 ; j < height ; ++j) {
+        for(unsigned int i = 0 ; i < width ; ++i) {
             labels_img(i, j) = binaryMask(i, j) ? Black() : labelColors.at(labels(i, j));
         }
     }
@@ -184,8 +184,8 @@ int main() {
         Image piece(w + 2 * padding, h + 2 * padding, background);
         Image piece_mask(w + 2 * padding, h + 2 * padding, White());
 
-        for(int j = 0 ; j < h ; ++j) {
-            for(int i = 0 ; i < w ; ++i) {
+        for(unsigned int j = 0 ; j < h ; ++j) {
+            for(unsigned int i = 0 ; i < w ; ++i) {
                 piece(i + padding, j + padding) = puzzle(i + position.minX, j + position.minY);
                 piece_mask(i + padding, j + padding) = Color(binaryMask(i + position.minX, j + position.minY));
             }
