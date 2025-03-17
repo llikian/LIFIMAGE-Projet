@@ -1,6 +1,6 @@
 /***************************************************************************************************
  * @file  analyse.cpp
- * @brief Contains the main program of the project
+ * @brief Contains the main program for the 'analyse' executable
  **************************************************************************************************/
 
 #include <filesystem>
