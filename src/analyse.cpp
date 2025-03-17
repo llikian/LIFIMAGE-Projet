@@ -58,6 +58,9 @@ int main() {
     binaryMask = erode(binaryMask, MathematicalMorphology::Cross);
     binaryMask = erode(binaryMask, MathematicalMorphology::Cross);
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
+    binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
+    binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
+
 
     // Erase the Borders of the Image and the Logo
     for(unsigned int i = 0 ; i < width ; ++i) {
