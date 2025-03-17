@@ -176,6 +176,7 @@ int main() {
     std::filesystem::create_directory("data/pieces");
     std::filesystem::create_directory("data/piece-masks");
 
+    unsigned int num_piece = 1;
     for(const auto& [label, position] : labelPositions) {
         unsigned int padding = 10;
         unsigned int w = position.maxX - position.minX;
@@ -191,8 +192,12 @@ int main() {
             }
         }
 
-        write_image_png(srgb(piece), ("data/pieces/piece-" + std::to_string(label) + ".png").c_str(), false);
-        write_image_png(srgb(piece_mask), ("data/piece-masks/piece-mask-" + std::to_string(label) + ".png").c_str(), false);
+        std::string strNum = (num_piece < 10) ? '0' + std::to_string(num_piece) : std::to_string(num_piece);
+
+        write_image_png(srgb(piece), ("data/pieces/piece-" + strNum + ".png").c_str(), false);
+        write_image_png(srgb(piece_mask), ("data/piece-masks/piece-mask-" + strNum + ".png").c_str(), false);
+
+        ++num_piece;
     }
 
     return 0;
