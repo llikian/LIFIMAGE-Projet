@@ -8,6 +8,7 @@
 template <typename Type>
 struct Array2D {
     Array2D(unsigned int rows, unsigned int columns);
+    Array2D(unsigned int rows, unsigned int columns, Type value);
     ~Array2D();
 
     Array2D(const Array2D& array);
@@ -30,6 +31,18 @@ Array2D<Type>::Array2D(unsigned int rows, unsigned int columns)
 
         for(unsigned int j = 0 ; j < columns ; ++j) {
             data[i][j] = Type();
+        }
+    }
+}
+
+template <typename Type>
+Array2D<Type>::Array2D(unsigned int rows, unsigned int columns, Type value)
+: rows(rows), columns(columns), data(new Type*[rows]) {
+    for(unsigned int i = 0 ; i < rows ; ++i) {
+        data[i] = new Type[columns];
+
+        for(unsigned int j = 0 ; j < columns ; ++j) {
+            data[i][j] = value;
         }
     }
 }
