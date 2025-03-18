@@ -64,13 +64,13 @@ int main() {
 
     // Erase the Borders of the Image and the Logo
     for(unsigned int i = 0 ; i < width ; ++i) {
-        for(unsigned int j = 0 ; j < 20 ; ++j) { binaryMask(i, j) = 1; }
-        for(unsigned int j = height - 20 ; j < height ; ++j) { binaryMask(i, j) = 1; }
+        for(unsigned int j = 0 ; j < 10 ; ++j) { binaryMask(i, j) = 1; }
+        for(unsigned int j = height - 10 ; j < height ; ++j) { binaryMask(i, j) = 1; }
     }
 
     for(unsigned int j = 0 ; j < height ; ++j) {
-        for(unsigned int i = 0 ; i < 20 ; ++i) { binaryMask(i, j) = 1; }
-        for(unsigned int i = width - 20 ; i < width ; ++i) { binaryMask(i, j) = 1; }
+        for(unsigned int i = 0 ; i < 10 ; ++i) { binaryMask(i, j) = 1; }
+        for(unsigned int i = width - 15 ; i < width ; ++i) { binaryMask(i, j) = 1; }
     }
 
     for(unsigned int j = 650 ; j <= 700 ; ++j) {
@@ -159,8 +159,8 @@ int main() {
             }
         }
     }
-
-    std::cout << "There are " << labelColors.size() << " unique labels:\n";
+    unsigned int labelCount = labelColors.size();
+    std::cout << "There are " << labelCount << " unique labels:\n";
     for(const auto& [label, _] : labelColors) {
         std::cout << label << ' ';
     }
@@ -202,6 +202,46 @@ int main() {
 
         ++num_piece;
     }
+
+
+    /* ---- Outline of pieces ---- */
+    Array2D<bool> Outline(width, height, false);
+
+    for(const auto& [label, position] : labelPositions) {
+        Point first = {position.minX, position.minY};
+        while (binaryMask(first.x, first.y)) {
+            first.x += 1;
+            first.y += 1;
+        }
+        Point current = first;
+        bool found = false;
+
+        do{
+            Outline(current.x, current.y) = true;
+
+            Point neighbour;
+            for(int j = -1; j <= 1; ++j) {
+                for(int i = -1; i <= 1; ++i) {
+                    if (i == 0 && j == 0) continue;
+                    neighbour = {current.x + i, current.y + j};
+
+                    if (neighbour.x >= 0 && neighbour.y >= 0 && neighbour.x < width && neighbour.y < height
+                        && binaryMask(neighbour.x, neighbour.y)
+                        && !Outline(neighbour.x, neighbour.y)
+                        && applyStructuringElement(binaryMask, neighbour.x, neighbour.y, MathematicalMorphology::Square) >= 1) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {break;}
+            }
+            if (!found) {break;}
+            current = neighbour;
+            found = false;
+        }while(current.x != first.x || current.y != first.y);
+    }
+    write_boolean_array_as_grayscale_image("data/outline.png", Outline);
+
 
     return 0;
 }
