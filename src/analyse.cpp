@@ -208,18 +208,18 @@ int main() {
     Array2D<bool> Outline(width, height, false);
 
     for(const auto& [label, position] : labelPositions) {
-        Point first = {position.minX, position.minY};
+        uPoint first = {position.minX, position.minY};
         while (binaryMask(first.x, first.y)) {
             first.x += 1;
             first.y += 1;
         }
-        Point current = first;
+        uPoint current = first;
         bool found = false;
 
         do{
             Outline(current.x, current.y) = true;
 
-            Point neighbour;
+            uPoint neighbour;
             for(int j = -1; j <= 1; ++j) {
                 for(int i = -1; i <= 1; ++i) {
                     if (i == 0 && j == 0) continue;
