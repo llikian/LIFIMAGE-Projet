@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 # Set sources and includes
 set(SOURCES
         # Classes
+        src/Application.cpp
         include/Array2D.hpp
 
         # Other Sources
