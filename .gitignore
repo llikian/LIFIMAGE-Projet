@@ -2,4 +2,5 @@
 bin
 build-debug
 build-release
-data
+data/analyse/piece-masks
+data/analyse/pieces

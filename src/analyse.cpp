@@ -12,14 +12,14 @@
 #include "utility.hpp"
 
 struct MinMaxPos {
-    unsigned int minX{-1u};
-    unsigned int minY{-1u};
-    unsigned int maxX{0u};
-    unsigned int maxY{0u};
+    unsigned int minX{ -1u };
+    unsigned int minY{ -1u };
+    unsigned int maxX{ 0u };
+    unsigned int maxY{ 0u };
 };
 
 int main() {
-    Image puzzle = read_image("data/puzzle.jpg", false);
+    Image puzzle = read_image("data/analyse/puzzle.jpg", false);
     unsigned int width = puzzle.width();
     unsigned int height = puzzle.height();
 
@@ -61,7 +61,6 @@ int main() {
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
     binaryMask = dilate(binaryMask, MathematicalMorphology::Square);
 
-
     // Erase the Borders of the Image and the Logo
     for(unsigned int i = 0 ; i < width ; ++i) {
         for(unsigned int j = 0 ; j < 10 ; ++j) { binaryMask(i, j) = 1; }
@@ -79,7 +78,7 @@ int main() {
         }
     }
 
-    write_boolean_array_as_grayscale_image("data/binary-mask.png", binaryMask);
+    write_boolean_array_as_grayscale_image("data/analyse/binary-mask.png", binaryMask);
 
     /* ---- Labeling ---- */
     Array2D<unsigned int> labels(width, height);
@@ -173,11 +172,11 @@ int main() {
         }
     }
 
-    write_image_png(srgb(labels_img), "data/labels.png", false);
+    write_image_png(srgb(labels_img), "data/analyse/labels.png", false);
 
     /* ---- Extract Pieces ---- */
-    std::filesystem::create_directory("data/pieces");
-    std::filesystem::create_directory("data/piece-masks");
+    std::filesystem::create_directory("data/analyse/pieces");
+    std::filesystem::create_directory("data/analyse/piece-masks");
 
     unsigned int num_piece = 1;
     for(const auto& [label, position] : labelPositions) {
@@ -197,51 +196,50 @@ int main() {
 
         std::string strNum = (num_piece < 10) ? '0' + std::to_string(num_piece) : std::to_string(num_piece);
 
-        write_image_png(srgb(piece), ("data/pieces/piece-" + strNum + ".png").c_str(), false);
-        write_image_png(srgb(piece_mask), ("data/piece-masks/piece-mask-" + strNum + ".png").c_str(), false);
+        write_image_png(srgb(piece), ("data/analyse/pieces/piece-" + strNum + ".png").c_str(), false);
+        write_image_png(srgb(piece_mask), ("data/analyse/piece-masks/piece-mask-" + strNum + ".png").c_str(), false);
 
         ++num_piece;
     }
-
 
     /* ---- Outline of pieces ---- */
     Array2D<bool> Outline(width, height, false);
 
     for(const auto& [label, position] : labelPositions) {
-        uPoint first = {position.minX, position.minY};
-        while (binaryMask(first.x, first.y)) {
+        uPoint first = { position.minX, position.minY };
+        while(binaryMask(first.x, first.y)) {
             first.x += 1;
             first.y += 1;
         }
         uPoint current = first;
         bool found = false;
 
-        do{
+        do {
             Outline(current.x, current.y) = true;
 
             uPoint neighbour;
-            for(int j = -1; j <= 1; ++j) {
-                for(int i = -1; i <= 1; ++i) {
-                    if (i == 0 && j == 0) continue;
-                    neighbour = {current.x + i, current.y + j};
+            for(int j = -1 ; j <= 1 ; ++j) {
+                for(int i = -1 ; i <= 1 ; ++i) {
+                    if(i == 0 && j == 0) continue;
+                    neighbour = { current.x + i, current.y + j };
 
-                    if (neighbour.x >= 0 && neighbour.y >= 0 && neighbour.x < width && neighbour.y < height
-                        && binaryMask(neighbour.x, neighbour.y)
-                        && !Outline(neighbour.x, neighbour.y)
-                        && applyStructuringElement(binaryMask, neighbour.x, neighbour.y, MathematicalMorphology::Square) >= 1) {
+                    if(neighbour.x >= 0 && neighbour.y >= 0 && neighbour.x < width && neighbour.y < height
+                       && binaryMask(neighbour.x, neighbour.y)
+                       && !Outline(neighbour.x, neighbour.y)
+                       && applyStructuringElement(binaryMask, neighbour.x, neighbour.y, MathematicalMorphology::Square)
+                       >= 1) {
                         found = true;
                         break;
                     }
                 }
-                if (found) {break;}
+                if(found) { break; }
             }
-            if (!found) {break;}
+            if(!found) { break; }
             current = neighbour;
             found = false;
-        }while(current.x != first.x || current.y != first.y);
+        } while(current.x != first.x || current.y != first.y);
     }
-    write_boolean_array_as_grayscale_image("data/outline.png", Outline);
-
+    write_boolean_array_as_grayscale_image("data/analyse/outline.png", Outline);
 
     return 0;
 }
