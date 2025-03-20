@@ -5,6 +5,6 @@
 
 #include "synthese/Hit.hpp"
 
-Hit::Hit() : intersection(infinity), normal(0.0f, 0.0f, 0.0f) { }
+Hit::Hit() : intersection(infinity), normal(0.0f, 0.0f, 0.0f), object(nullptr) { }
 
-Hit::Hit(float intersection, const Vector& normal) : intersection(intersection), normal(normal) { }
+Hit::Hit(float intersection, const Vector& normal) : intersection(intersection), normal(normal), object(nullptr) { }

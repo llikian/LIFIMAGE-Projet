@@ -9,11 +9,26 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <synthese/Ray.hpp>
+
 #include "utility.hpp"
 
-Application::Application() : camera(0.0f, 0.0f, 0.0f) { }
+Application::Application()
+    : camera(0.0f, 0.0f, 0.0f) {
+    /* ---- Lights ---- */
+    lights.emplace_back(normalize(Vector(-4.0f, 6.0f, 1.0f)), Color(1.0f, 1.0f, 1.0f));
+    // lights.emplace_back(normalize(Vector(4.0f, 6.0f, -1.0f)), Color(1.0f, 1.0f, 1.0f));
 
-Application::~Application() { }
+    /* ---- Objects ---- */
+    objects.push_back(new Plane(Color(0.267f, 0.749f, 0.267f), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+    objects.push_back(new Sphere(Color(1.0f, 0.0f, 0.0f), Point(0.0f, 0.0f, -3.0f), 1.0f));
+}
+
+Application::~Application() {
+    for(const Object* object : objects) {
+        delete object;
+    }
+}
 
 Image Application::run(unsigned int width, unsigned int height) {
     const std::chrono::time_point startTime(std::chrono::high_resolution_clock::now());
@@ -35,7 +50,7 @@ Image Application::run(unsigned int width, unsigned int height) {
     std::chrono::duration<float> duration = std::chrono::high_resolution_clock::now() - startTime;
     std::cout << "The image took " << duration.count() << "s to compute.\n";
 
-    return std::move(image);
+    return image;
 }
 
 void Application::process(Image& image) const {
@@ -51,13 +66,12 @@ void Application::process(Image& image) const {
 
     const unsigned int rows = image.height();
     const unsigned int columns = image.width();
-    const float aspectRatio = columns / rows;
 
     mutex.lock();
     unsigned int row = globalRow++;
     mutex.unlock();
 
-    Point extremity( 0.0f, 0.0f, -1.0f);
+    Point extremity(0.0f, 0.0f, -1.0f);
     while(row < rows) {
         for(unsigned int column = 0 ; column < columns ; ++column) {
             Color color;
@@ -81,5 +95,50 @@ void Application::process(Image& image) const {
 }
 
 Color Application::processPixel(Point extremity) const {
-    return Color((extremity.x + 1.0f) / 2.0f, 0.0f, (extremity.y + 1.0f) / 2.0f);
+    static const Color background(0.447f, 0.643f, 0.89f);
+    static const Vector horizon(0.0f, 1.0f, 0.0f);
+
+    const Ray ray(camera, Vector(camera, extremity));
+
+    Hit hit = getClosestHit(ray);
+    if(hit.object == nullptr) {
+        return background;
+    }
+
+    Color color = static_cast<const Object*>(hit.object)->color;
+    Point epsilonPoint = ray.getEpsilonPoint(hit);
+
+    Color lightColor = Black();
+    unsigned int shadows = 0;
+
+    for(const Light& light : lights) {
+        // Lighting
+        lightColor += light.color * std::max(dot(hit.normal, light.direction), 0.0f);
+
+        // Shadows
+        Hit closest = getClosestHit(Ray(epsilonPoint, light.direction));
+        if(closest.object != nullptr && closest.object != hit.object) {
+            ++shadows;
+        }
+    }
+
+    return color * lightColor * (1.0f - static_cast<float>(shadows) / lights.size());
+}
+
+Hit Application::getClosestHit(const Ray& ray) const {
+    Hit closest;
+
+    for(const Object* object : objects) {
+        Hit hit = object->intersect(ray);
+
+        if(hit.intersection != infinity) {
+            if(closest.object == nullptr || hit.intersection < closest.intersection) {
+                closest.intersection = hit.intersection;
+                closest.normal = hit.normal;
+                closest.object = object;
+            }
+        }
+    }
+
+    return closest;
 }

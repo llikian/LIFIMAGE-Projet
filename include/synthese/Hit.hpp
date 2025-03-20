@@ -20,4 +20,5 @@ struct Hit {
 
     float intersection;
     Vector normal;
+    const void* object;
 };

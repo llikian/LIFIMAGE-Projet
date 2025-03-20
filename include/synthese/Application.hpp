@@ -5,7 +5,10 @@
 
 #pragma once
 
+#include <vector>
 #include "image.h"
+#include "Light.hpp"
+#include "Object.hpp"
 #include "vec.h"
 
 /**
@@ -22,6 +25,10 @@ public:
 private:
     void process(Image& image) const;
     Color processPixel(Point extremity) const;
+    Hit getClosestHit(const Ray& ray) const;
 
     Point camera;
+
+    std::vector<const Object*> objects;
+    std::vector<Light> lights;
 };
