@@ -3,7 +3,7 @@
  * @brief Contains the main program for the 'synthese' executable
  **************************************************************************************************/
 
-#include "Application.hpp"
+#include "synthese/Application.hpp"
 
 #include <iostream>
 #include <stdexcept>

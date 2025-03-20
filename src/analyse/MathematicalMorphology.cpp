@@ -3,7 +3,7 @@
  * @brief Implementation of the MathematicalMorphology namespace
  **************************************************************************************************/
 
-#include "MathematicalMorphology.hpp"
+#include "analyse/MathematicalMorphology.hpp"
 
 #include <utility>
 

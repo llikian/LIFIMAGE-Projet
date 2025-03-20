@@ -25,11 +25,3 @@ bool isValueSimilar(float value, float base, float epsilon);
 bool isColorSimilar(const Color& color, const Color& base, const Color& epsilon);
 
 void write_boolean_array_as_grayscale_image(const std::string& path, const Array2D<bool>& data);
-
-struct uPoint {
-    unsigned int x;
-    unsigned int y;
-
-    uPoint() : x(0), y(0) {}
-    uPoint(const unsigned int x1, const unsigned int x2) : x(x1), y(x2) {}
-};

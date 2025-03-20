@@ -13,7 +13,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 # Set sources and includes
 set(SOURCES
         # Classes
-        src/Application.cpp
         include/Array2D.hpp
 
         # Other Sources
@@ -38,12 +37,14 @@ set(INCLUDES
 # Executables
 add_executable(Analyse src/analyse.cpp
         ${SOURCES}
-        src/MathematicalMorphology.cpp
+        src/analyse/MathematicalMorphology.cpp
+        src/analyse/uvec2.cpp
 )
 target_include_directories(Analyse PUBLIC ${INCLUDES})
 
 add_executable(Synthese src/synthese.cpp
         ${SOURCES}
+        src/synthese/Application.cpp
 )
 target_include_directories(Synthese PUBLIC ${INCLUDES})
 

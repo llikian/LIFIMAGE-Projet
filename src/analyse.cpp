@@ -8,8 +8,9 @@
 #include <unordered_map>
 #include "Array2D.hpp"
 #include "image_io.h"
-#include "MathematicalMorphology.hpp"
 #include "utility.hpp"
+#include "analyse/MathematicalMorphology.hpp"
+#include "analyse/uvec2.hpp"
 
 struct MinMaxPos {
     unsigned int minX{ -1u };
@@ -206,18 +207,18 @@ int main() {
     Array2D<bool> Outline(width, height, false);
 
     for(const auto& [label, position] : labelPositions) {
-        uPoint first = { position.minX, position.minY };
+        uvec2 first = { position.minX, position.minY };
         while(binaryMask(first.x, first.y)) {
             first.x += 1;
             first.y += 1;
         }
-        uPoint current = first;
+        uvec2 current = first;
         bool found = false;
 
         do {
             Outline(current.x, current.y) = true;
 
-            uPoint neighbour;
+            uvec2 neighbour;
             for(int j = -1 ; j <= 1 ; ++j) {
                 for(int i = -1 ; i <= 1 ; ++i) {
                     if(i == 0 && j == 0) continue;

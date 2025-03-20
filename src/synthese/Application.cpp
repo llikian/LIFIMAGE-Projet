@@ -3,15 +3,14 @@
  * @brief Implementation of the Application class
  **************************************************************************************************/
 
-#include "Application.hpp"
+#include "synthese/Application.hpp"
 
 #include <mutex>
 #include <thread>
 #include <vector>
 #include "utility.hpp"
 
-Application::Application()
-    : camera(0.0f, 0.0f, 0.0f) { }
+Application::Application() : camera(0.0f, 0.0f, 0.0f) { }
 
 Application::~Application() { }
 
