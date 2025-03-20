@@ -5,6 +5,7 @@
 
 #include "synthese/Application.hpp"
 
+#include <chrono>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -21,8 +22,8 @@ Image Application::run(unsigned int width, unsigned int height) {
 
     std::vector<std::thread> threads;
     unsigned int threadCount = std::thread::hardware_concurrency();
-    std::cout << "Dispatching " << threadCount << " threads...\n";
 
+    std::cout << "Dispatching " << threadCount << " threads...\n";
     for(unsigned int i = 0 ; i < threadCount ; ++i) {
         threads.emplace_back(&Application::process, this, std::ref(image));
     }
@@ -34,25 +35,12 @@ Image Application::run(unsigned int width, unsigned int height) {
     std::chrono::duration<float> duration = std::chrono::high_resolution_clock::now() - startTime;
     std::cout << "The image took " << duration.count() << "s to compute.\n";
 
-    return image;
-}
-
-static unsigned int getRows(unsigned int rows) {
-    static unsigned int row = 0;
-    static std::mutex mutex;
-
-    std::unique_lock lock(mutex);
-
-    if(row < rows) {
-        return row++;
-    } else {
-        return -1;
-    }
+    return std::move(image);
 }
 
 void Application::process(Image& image) const {
-    unsigned int rows = image.height();
-    unsigned int columns = image.width();
+    static unsigned int globalRow = 0;
+    static std::mutex mutex;
 
     static const vec2 offsets[4]{
         vec2(0.5f, 0.75f),
@@ -61,15 +49,24 @@ void Application::process(Image& image) const {
         vec2(0.75f, -0.5f)
     };
 
-    unsigned int row = getRows(rows);
+    const unsigned int rows = image.height();
+    const unsigned int columns = image.width();
+    const float aspectRatio = columns / rows;
+
+    mutex.lock();
+    unsigned int row = globalRow++;
+    mutex.unlock();
+
+    Point extremity( 0.0f, 0.0f, -1.0f);
     while(row < rows) {
         for(unsigned int column = 0 ; column < columns ; ++column) {
             Color color;
 
             for(const vec2& offset : offsets) {
-                color += processPixel(Point((2.0f * column - (columns + offset.x)) / rows,
-                                            (2.0f * row - (rows + offset.y)) / rows,
-                                            -1.0f));
+                extremity.x = (2.0f * (column + offset.x) - columns) / rows;
+                extremity.y = (2.0f * (row + offset.y) - rows) / rows;
+
+                color += processPixel(extremity);
             }
 
             Color& pixel = image(column, row);
@@ -77,7 +74,9 @@ void Application::process(Image& image) const {
             pixel.a = 1.0f;
         }
 
-        row = getRows(rows);
+        mutex.lock();
+        row = globalRow++;
+        mutex.unlock();
     }
 }
 

@@ -45,6 +45,9 @@ target_include_directories(Analyse PUBLIC ${INCLUDES})
 add_executable(Synthese src/synthese.cpp
         ${SOURCES}
         src/synthese/Application.cpp
+        src/synthese/Hit.cpp
+        src/synthese/Object.cpp
+        src/synthese/Ray.cpp
 )
 target_include_directories(Synthese PUBLIC ${INCLUDES})
 
