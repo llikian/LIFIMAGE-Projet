@@ -5,6 +5,6 @@
 
 #include "synthese/Light.hpp"
 
-Light::Light(const Vector& direction, const Color& color) : direction(direction), color(color) { }
+Light::Light(const Point& position, const Color& color) : position(position), color(color) { }
 
-Light::Light(const Vector& direction) : direction(direction), color(1.0f, 1.0f, 1.0f) { }
+Light::Light(const Point& position) : position(position), color(1.0f, 1.0f, 1.0f) { }

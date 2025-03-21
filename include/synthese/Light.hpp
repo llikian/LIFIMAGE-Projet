@@ -13,9 +13,9 @@
  * @brief
  */
 struct Light {
-    Light(const Vector& direction, const Color& color);
-    Light(const Vector& direction);
+    Light(const Point& position, const Color& color);
+    Light(const Point& position);
 
-    Vector direction;
+    Point position;
     Color color;
 };

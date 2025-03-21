@@ -16,12 +16,13 @@
 Application::Application()
     : camera(0.0f, 0.0f, 0.0f) {
     /* ---- Lights ---- */
-    lights.emplace_back(normalize(Vector(-4.0f, 6.0f, 1.0f)), Color(1.0f, 1.0f, 1.0f));
-    // lights.emplace_back(normalize(Vector(4.0f, 6.0f, -1.0f)), Color(1.0f, 1.0f, 1.0f));
+    lights.emplace_back(Point(-4.0f, 6.0f, -4.0f), Color(1.0f, 1.0f, 1.0f));
+    lights.emplace_back(Point(4.0f, 6.0f, -4.0f), Color(1.0f, 1.0f, 1.0f));
 
     /* ---- Objects ---- */
     objects.push_back(new Plane(Color(0.267f, 0.749f, 0.267f), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
     objects.push_back(new Sphere(Color(1.0f, 0.0f, 0.0f), Point(0.0f, 0.0f, -3.0f), 1.0f));
+    // for(const Light& light : lights) { objects.push_back(new Sphere(light.color, light.position, 0.2f)); }
 }
 
 Application::~Application() {
@@ -112,11 +113,13 @@ Color Application::processPixel(Point extremity) const {
     float shadows = 1.0f;
 
     for(const Light& light : lights) {
+        Ray lightRay(epsilonPoint, normalize(Vector(epsilonPoint, light.position)));
+
         // Lighting
-        lightColor += light.color * std::max(dot(hit.normal, light.direction), 0.0f);
+        lightColor += light.color * std::max(dot(hit.normal, lightRay.direction), 0.0f);
 
         // Shadows
-        Hit closest = getClosestHit(Ray(epsilonPoint, light.direction));
+        Hit closest = getClosestHit(lightRay);
         if(closest.object != nullptr && closest.object != hit.object) {
             shadows *= 0.2f;
         }
