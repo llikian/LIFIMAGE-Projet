@@ -17,13 +17,18 @@ Application::Application()
     : camera(0.0f, 0.0f, 0.0f) {
     /* ---- Lights ---- */
     // lights.emplace_back(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
-    lights.emplace_back(new PointLight(Color(1.0f, 0.0f, 0.0f), Point(0.0f, 3.0f, -3.0f), 15.0f));
-    lights.emplace_back(new PointLight(Color(0.0f, 1.0f, 0.0f), Point(-3.0f, 0.01f, -3.0f), 15.0f));
-    lights.emplace_back(new PointLight(Color(0.0f, 0.0f, 1.0f), Point(3.0f, 0.01f, -3.0f), 15.0f));
+    // lights.emplace_back(new PointLight(White(), Point(0.0f, 3.0f, -5.0f), 0.045f, 0.0075f));
+
+    float linear = 0.09f;
+    float quadratic = 0.032f;
+    lights.emplace_back(new PointLight(Red(), Point(0.0f, 2.0f, -3.0f), linear, quadratic));
+    lights.emplace_back(new PointLight(Green(), Point(2.0f, 0.01f, -3.0f), linear, quadratic));
+    lights.emplace_back(new PointLight(Blue(), Point(-2.0f, 0.01f, -3.0f), linear, quadratic));
 
     /* ---- Objects ---- */
     objects.push_back(new Plane(Color(0.267f, 0.749f, 0.267f), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
-    objects.push_back(new Sphere(Color(1.0f, 0.0f, 0.0f), Point(0.0f, 0.0f, -3.0f), 1.0f));
+    objects.push_back(new Sphere(Color(0.82f, 0.2f, 0.2f), Point(-1.0f, 1.0f, -3.0f), 1.0f));
+    objects.push_back(new Sphere(Color(0.2f, 0.2f, 0.82f), Point(1.0f, 1.0f, -3.0f), 1.0f));
 }
 
 Application::~Application() {
