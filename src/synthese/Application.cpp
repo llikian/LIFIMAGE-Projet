@@ -16,19 +16,19 @@
 Application::Application()
     : camera(0.0f, 0.0f, 0.0f) {
     /* ---- Lights ---- */
-    lights.emplace_back(Point(-4.0f, 6.0f, -4.0f), Color(1.0f, 1.0f, 1.0f));
-    lights.emplace_back(Point(4.0f, 6.0f, -4.0f), Color(1.0f, 1.0f, 1.0f));
+    // lights.emplace_back(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
+    lights.emplace_back(new PointLight(Color(1.0f, 0.0f, 0.0f), Point(0.0f, 3.0f, -3.0f), 15.0f));
+    lights.emplace_back(new PointLight(Color(0.0f, 1.0f, 0.0f), Point(-3.0f, 0.01f, -3.0f), 15.0f));
+    lights.emplace_back(new PointLight(Color(0.0f, 0.0f, 1.0f), Point(3.0f, 0.01f, -3.0f), 15.0f));
 
     /* ---- Objects ---- */
     objects.push_back(new Plane(Color(0.267f, 0.749f, 0.267f), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
     objects.push_back(new Sphere(Color(1.0f, 0.0f, 0.0f), Point(0.0f, 0.0f, -3.0f), 1.0f));
-    // for(const Light& light : lights) { objects.push_back(new Sphere(light.color, light.position, 0.2f)); }
 }
 
 Application::~Application() {
-    for(const Object* object : objects) {
-        delete object;
-    }
+    for(const Object* object : objects) { delete object; }
+    for(const Light* light : lights) { delete light; }
 }
 
 Image Application::run(unsigned int width, unsigned int height) {
@@ -95,37 +95,44 @@ void Application::process(Image& image) const {
     }
 }
 
+Color lerp(const Color& A, const Color& B, float t) {
+    return A * (1.0f - t) + B * t;
+}
+
 Color Application::processPixel(Point extremity) const {
-    static const Color background(0.447f, 0.643f, 0.89f);
     static const Vector horizon(0.0f, 1.0f, 0.0f);
 
     const Ray ray(camera, normalize(Vector(camera, extremity)));
 
     Hit hit = getClosestHit(ray);
     if(hit.object == nullptr) {
-        return background;
+        static const Color darkSky(0.239f, 0.29f, 0.761f);
+        static const Color lightSky(0.671f, 0.851f, 1.0f);
+
+        return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f);
     }
 
     Color color = static_cast<const Object*>(hit.object)->color;
     Point epsilonPoint = ray.getEpsilonPoint(hit);
 
+    Ray lightRay(epsilonPoint, Vector());
     Color lightColor;
     float shadows = 1.0f;
 
-    for(const Light& light : lights) {
-        Ray lightRay(epsilonPoint, normalize(Vector(epsilonPoint, light.position)));
-
+    for(const Light* light : lights) {
         // Lighting
-        lightColor += light.color * std::max(dot(hit.normal, lightRay.direction), 0.0f);
+        Color lighting = light->calculate(hit, lightRay);
 
         // Shadows
         Hit closest = getClosestHit(lightRay);
         if(closest.object != nullptr && closest.object != hit.object) {
-            shadows *= 0.2f;
+            lightColor += 0.2f * lighting;
+        } else {
+            lightColor += lighting;
         }
     }
 
-    return color * lightColor / lights.size() * shadows;
+    return color * lightColor * shadows;
 }
 
 Hit Application::getClosestHit(const Ray& ray) const {

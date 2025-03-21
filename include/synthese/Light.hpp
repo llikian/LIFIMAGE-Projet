@@ -5,17 +5,42 @@
 
 #pragma once
 
-#include <color.h>
-#include <vec.h>
+#include "color.h"
+#include "Ray.hpp"
+#include "vec.h"
 
-/**
- * @struct Light
- * @brief
- */
 struct Light {
-    Light(const Point& position, const Color& color);
-    Light(const Point& position);
+    explicit Light(const Color& color);
+    virtual ~Light() = default;
+
+    virtual Color calculate(const Hit& hit, Ray& ray) const = 0;
+
+    Color color;
+};
+
+struct DirectionalLight : Light {
+    DirectionalLight(const Color& color, const Vector& direction);
+
+    Color calculate(const Hit& hit, Ray& ray) const override;
+
+    Vector direction;
+};
+
+struct PointLight : Light {
+    PointLight(const Color& color, const Point& position, float radius);
+
+    Color calculate(const Hit& hit, Ray& ray) const override;
 
     Point position;
-    Color color;
+    float radius;
+};
+
+struct SpotLight : Light {
+    SpotLight(const Color& color, const Point& position, const Vector& direction, float radius);
+
+    Color calculate(const Hit& hit, Ray& ray) const override;
+
+    Point position;
+    Vector direction;
+    float radius;
 };

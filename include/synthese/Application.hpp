@@ -30,5 +30,5 @@ private:
     Point camera;
 
     std::vector<const Object*> objects;
-    std::vector<Light> lights;
+    std::vector<const Light*> lights;
 };
