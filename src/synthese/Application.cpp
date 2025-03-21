@@ -98,7 +98,7 @@ Color Application::processPixel(Point extremity) const {
     static const Color background(0.447f, 0.643f, 0.89f);
     static const Vector horizon(0.0f, 1.0f, 0.0f);
 
-    const Ray ray(camera, Vector(camera, extremity));
+    const Ray ray(camera, normalize(Vector(camera, extremity)));
 
     Hit hit = getClosestHit(ray);
     if(hit.object == nullptr) {
@@ -108,8 +108,8 @@ Color Application::processPixel(Point extremity) const {
     Color color = static_cast<const Object*>(hit.object)->color;
     Point epsilonPoint = ray.getEpsilonPoint(hit);
 
-    Color lightColor = Black();
-    unsigned int shadows = 0;
+    Color lightColor;
+    float shadows = 1.0f;
 
     for(const Light& light : lights) {
         // Lighting
@@ -118,11 +118,11 @@ Color Application::processPixel(Point extremity) const {
         // Shadows
         Hit closest = getClosestHit(Ray(epsilonPoint, light.direction));
         if(closest.object != nullptr && closest.object != hit.object) {
-            ++shadows;
+            shadows *= 0.2f;
         }
     }
 
-    return color * lightColor * (1.0f - static_cast<float>(shadows) / lights.size());
+    return color * lightColor / lights.size() * shadows;
 }
 
 Hit Application::getClosestHit(const Ray& ray) const {
