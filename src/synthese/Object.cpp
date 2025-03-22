@@ -7,10 +7,17 @@
 
 #include <cmath>
 
-Object::Object(const Color& color) : color(color) { }
+Object::Object(const Color& color)
+    : getColor([color](const Point&) { return color; }) { }
+
+Object::Object(const std::function<Color(const Point&)>& getColor)
+    : getColor(getColor) { }
 
 Plane::Plane(const Color& color, const Point& point, const Vector& normal)
     : Object(color), point(point), normal(normalize(normal)) { }
+
+Plane::Plane(const std::function<Color(const Point&)>& getColor, const Point& point, const Vector& normal)
+    : Object(getColor), point(point), normal(normalize(normal)) { }
 
 Hit Plane::intersect(const Ray& ray) const {
     Hit hit;
@@ -28,6 +35,9 @@ Hit Plane::intersect(const Ray& ray) const {
 
 Sphere::Sphere(const Color& color, const Point& center, float radius)
     : Object(color), center(center), radius(radius) { }
+
+Sphere::Sphere(const std::function<Color(const Point&)>& getColor, const Point& center, float radius)
+    : Object(getColor), center(center), radius(radius) { }
 
 Hit Sphere::intersect(const Ray& ray) const {
     Hit hit;
@@ -56,6 +66,9 @@ Hit Sphere::intersect(const Ray& ray) const {
 
 Triangle::Triangle(const Color& color, const Point& A, const Point& B, const Point& C)
     : Object(color), A(A), B(B), C(C) { }
+
+Triangle::Triangle(const std::function<Color(const Point&)>& getColor, const Point& A, const Point& B, const Point& C)
+    : Object(getColor), A(A), B(B), C(C) { }
 
 Hit Triangle::intersect(const Ray& ray) const {
     Hit hit;

@@ -1,52 +1,37 @@
 /***************************************************************************************************
- * @file  Application.cpp
- * @brief Implementation of the Application class
+ * @file  Scene.cpp
+ * @brief Implementation of the Scene class
  **************************************************************************************************/
 
-#include "synthese/Application.hpp"
+#include "synthese/Scene.hpp"
 
 #include <chrono>
 #include <mutex>
 #include <thread>
-#include <vector>
-#include <synthese/Ray.hpp>
-
+#include "image_io.h"
 #include "utility.hpp"
 
-Application::Application()
-    : camera(0.0f, 0.0f, 0.0f) {
-    /* ---- Lights ---- */
-    // lights.emplace_back(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
-    // lights.emplace_back(new PointLight(White(), Point(0.0f, 3.0f, -5.0f), 0.045f, 0.0075f));
+Scene::Scene() : globalRow(0) { }
 
-    float linear = 0.09f;
-    float quadratic = 0.032f;
-    lights.emplace_back(new PointLight(Red(), Point(0.0f, 2.0f, -3.0f), linear, quadratic));
-    lights.emplace_back(new PointLight(Green(), Point(2.0f, 0.01f, -3.0f), linear, quadratic));
-    lights.emplace_back(new PointLight(Blue(), Point(-2.0f, 0.01f, -3.0f), linear, quadratic));
-
-    /* ---- Objects ---- */
-    objects.push_back(new Plane(Color(0.267f, 0.749f, 0.267f), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
-    objects.push_back(new Sphere(Color(0.82f, 0.2f, 0.2f), Point(-1.0f, 1.0f, -3.0f), 1.0f));
-    objects.push_back(new Sphere(Color(0.2f, 0.2f, 0.82f), Point(1.0f, 1.0f, -3.0f), 1.0f));
-}
-
-Application::~Application() {
+Scene::~Scene() {
     for(const Object* object : objects) { delete object; }
     for(const Light* light : lights) { delete light; }
 }
 
-Image Application::run(unsigned int width, unsigned int height) {
-    const std::chrono::time_point startTime(std::chrono::high_resolution_clock::now());
+void Scene::render(const std::string& path, unsigned int width, unsigned int height) {
+    if(objects.empty()) { throw std::runtime_error("Cannot render an empty scene."); }
+    if(width == 0 || height == 0) { throw std::runtime_error("Cannot render to an empty image."); }
 
     Image image(width, height);
-
     std::vector<std::thread> threads;
+    const std::chrono::time_point startTime(std::chrono::high_resolution_clock::now());
+
     unsigned int threadCount = std::thread::hardware_concurrency();
+    globalRow = 0;
 
     std::cout << "Dispatching " << threadCount << " threads...\n";
     for(unsigned int i = 0 ; i < threadCount ; ++i) {
-        threads.emplace_back(&Application::process, this, std::ref(image));
+        threads.emplace_back(&Scene::computeImage, this, std::ref(image));
     }
 
     for(std::thread& thread : threads) {
@@ -56,18 +41,25 @@ Image Application::run(unsigned int width, unsigned int height) {
     std::chrono::duration<float> duration = std::chrono::high_resolution_clock::now() - startTime;
     std::cout << "The image took " << duration.count() << "s to compute.\n";
 
-    return image;
+    write_image(image, path.c_str());
 }
 
-void Application::process(Image& image) const {
-    static unsigned int globalRow = 0;
+void Scene::add(const Light* light) {
+    lights.push_back(light);
+}
+
+void Scene::add(const Object* object) {
+    objects.push_back(object);
+}
+
+void Scene::computeImage(Image& image) {
     static std::mutex mutex;
 
     static const vec2 offsets[4]{
-        vec2(0.5f, 0.75f),
-        vec2(-0.5f, -0.75f),
-        vec2(-0.75f, 0.5f),
-        vec2(0.75f, -0.5f)
+        vec2(0.125f, 0.375f),
+        vec2(-0.125f, -0.375f),
+        vec2(-0.375f, 0.125f),
+        vec2(0.375f, -0.125f)
     };
 
     const unsigned int rows = image.height();
@@ -86,11 +78,11 @@ void Application::process(Image& image) const {
                 extremity.x = (2.0f * (column + offset.x) - columns) / rows;
                 extremity.y = (2.0f * (row + offset.y) - rows) / rows;
 
-                color += processPixel(extremity);
+                color += computePixel(extremity);
             }
 
             Color& pixel = image(column, row);
-            pixel = color / 4.0f;
+            pixel = 0.25f * color;
             pixel.a = 1.0f;
         }
 
@@ -100,11 +92,7 @@ void Application::process(Image& image) const {
     }
 }
 
-Color lerp(const Color& A, const Color& B, float t) {
-    return A * (1.0f - t) + B * t;
-}
-
-Color Application::processPixel(Point extremity) const {
+Color Scene::computePixel(Point extremity) const {
     static const Vector horizon(0.0f, 1.0f, 0.0f);
 
     const Ray ray(camera, normalize(Vector(camera, extremity)));
@@ -117,30 +105,27 @@ Color Application::processPixel(Point extremity) const {
         return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f);
     }
 
-    Color color = static_cast<const Object*>(hit.object)->color;
+    Point point = ray.getPoint(hit.intersection);
     Point epsilonPoint = ray.getEpsilonPoint(hit);
+    Color color = static_cast<const Object*>(hit.object)->getColor(point);
 
     Ray lightRay(epsilonPoint, Vector());
     Color lightColor;
-    float shadows = 1.0f;
 
     for(const Light* light : lights) {
-        // Lighting
+        // Lighting: Needs to be before getClosestHit because it defines lightRay.direction
         Color lighting = light->calculate(hit, lightRay);
 
-        // Shadows
         Hit closest = getClosestHit(lightRay);
-        if(closest.object != nullptr && closest.object != hit.object) {
-            lightColor += 0.2f * lighting;
-        } else {
+        if(closest.object == nullptr || closest.object == hit.object) {
             lightColor += lighting;
         }
     }
 
-    return color * lightColor * shadows;
+    return color * lightColor;
 }
 
-Hit Application::getClosestHit(const Ray& ray) const {
+Hit Scene::getClosestHit(const Ray& ray) const {
     Hit closest;
 
     for(const Object* object : objects) {

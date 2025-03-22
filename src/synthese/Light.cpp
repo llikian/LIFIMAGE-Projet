@@ -17,22 +17,15 @@ Color DirectionalLight::calculate(const Hit& hit, Ray& ray) const {
     return color * std::max(dot(hit.normal, ray.direction), 0.0f);
 }
 
-PointLight::PointLight(const Color& color, const Point& position, float linear, float quadratic)
-    : Light(color), position(position), linear(linear), quadratic(quadratic) { }
+PointLight::PointLight(const Color& color, const Point& position, float radius)
+    : Light(color), position(position), radius(radius) { }
 
 Color PointLight::calculate(const Hit& hit, Ray& ray) const {
     ray.direction = position - ray.origin;
     float distance = length(ray.direction);
     ray.direction = ray.direction / distance;
 
-    float attenuation = 1.0f / (1.0f + distance * (linear + distance * quadratic));
+    float attenuation = std::max(radius * radius / (distance * distance), 0.0f);
 
     return color * attenuation * std::max(dot(hit.normal, ray.direction), 0.0f);
-}
-
-SpotLight::SpotLight(const Color& color, const Point& position, const Vector& direction, float radius)
-    : Light(color), position(position), direction(direction), radius(radius) { }
-
-Color SpotLight::calculate(const Hit& hit, Ray& ray) const {
-    return Color(); // TODO : Implement
 }

@@ -27,21 +27,10 @@ struct DirectionalLight : Light {
 };
 
 struct PointLight : Light {
-    PointLight(const Color& color, const Point& position, float linear, float quadratic);
+    PointLight(const Color& color, const Point& position, float radius);
 
     Color calculate(const Hit& hit, Ray& ray) const override;
 
     Point position;
-    float linear;
-    float quadratic;
-};
-
-struct SpotLight : Light {
-    SpotLight(const Color& color, const Point& position, const Vector& direction, float radius);
-
-    Color calculate(const Hit& hit, Ray& ray) const override;
-
-    Point position;
-    Vector direction;
     float radius;
 };

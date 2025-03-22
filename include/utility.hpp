@@ -25,3 +25,8 @@ bool isValueSimilar(float value, float base, float epsilon);
 bool isColorSimilar(const Color& color, const Color& base, const Color& epsilon);
 
 void write_boolean_array_as_grayscale_image(const std::string& path, const Array2D<bool>& data);
+
+template<typename Type>
+Color lerp(const Type& A, const Type& B, float t) {
+    return A * (1.0f - t) + B * t;
+}

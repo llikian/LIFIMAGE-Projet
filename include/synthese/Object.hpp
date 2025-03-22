@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional>
 #include "color.h"
 #include "Hit.hpp"
 #include "Ray.hpp"
@@ -16,15 +17,17 @@
  */
 struct Object {
     explicit Object(const Color& color);
+    explicit Object(const std::function<Color(const Point&)>& getColor);
     virtual ~Object() = default;
 
     virtual Hit intersect(const Ray& ray) const = 0;
 
-    Color color;
+    std::function<Color(const Point&)> getColor;
 };
 
 struct Plane : Object {
     Plane(const Color& color, const Point& point, const Vector& normal);
+    Plane(const std::function<Color(const Point&)>& getColor, const Point& point, const Vector& normal);
 
     Hit intersect(const Ray& ray) const override;
 
@@ -34,6 +37,7 @@ struct Plane : Object {
 
 struct Sphere : Object {
     Sphere(const Color& color, const Point& center, float radius);
+    Sphere(const std::function<Color(const Point&)>& getColor, const Point& center, float radius);
 
     Hit intersect(const Ray& ray) const override;
 
@@ -43,6 +47,7 @@ struct Sphere : Object {
 
 struct Triangle : Object {
     Triangle(const Color& color, const Point& A, const Point& B, const Point& C);
+    Triangle(const std::function<Color(const Point&)>& getColor, const Point& A, const Point& B, const Point& C);
 
     Hit intersect(const Ray& ray) const override;
 
