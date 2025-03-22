@@ -9,6 +9,7 @@
 #include <mutex>
 #include <thread>
 #include "image_io.h"
+#include "mesh_io.h"
 #include "utility.hpp"
 
 Scene::Scene() : globalRow(0) { }
@@ -50,6 +51,27 @@ void Scene::add(const Light* light) {
 
 void Scene::add(const Object* object) {
     objects.push_back(object);
+}
+
+void Scene::add(const std::string& meshPath, const Vector& translation, const Color& color) {
+    std::vector<Point> positions;
+    read_positions(meshPath.c_str(), positions);
+
+    for(unsigned int i = 0 ; i < positions.size() / 3 ; i++) {
+        Point A = positions[3 * i] + translation;
+        Point B = positions[3 * i + 1] + translation;
+        Point C = positions[3 * i + 2] + translation;
+        add(new Triangle(color, A, B, C));
+    }
+}
+
+void Scene::add(const std::vector<Point>& meshData, const Vector& translation, const Color& color) {
+    for(unsigned int i = 0 ; i < meshData.size() / 3 ; i++) {
+        Point A = meshData[3 * i] + translation;
+        Point B = meshData[3 * i + 1] + translation;
+        Point C = meshData[3 * i + 2] + translation;
+        add(new Triangle(color, A, B, C));
+    }
 }
 
 void Scene::computeImage(Image& image) {

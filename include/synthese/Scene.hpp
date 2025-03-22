@@ -27,6 +27,8 @@ public:
 
     void add(const Light* light);
     void add(const Object* object);
+    void add(const std::string& meshPath, const Vector& translation, const Color& color = White());
+    void add(const std::vector<Point>& meshData, const Vector& translation, const Color& color = White());
 
 private:
     void computeImage(Image& image);

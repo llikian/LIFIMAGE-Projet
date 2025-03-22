@@ -6,6 +6,7 @@
 #include "synthese/Scene.hpp"
 
 #include <iostream>
+#include "mesh_io.h"
 
 Scene scene1() {
     Scene scene;
@@ -17,9 +18,7 @@ Scene scene1() {
     /* ---- Objects ---- */
     scene.add(new Plane([](const Point& point) {
         return std::fmod(floor(point.x) + floor(point.z), 2.0f) == 0.0f ? White() : Black(); // Checker
-    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
-
-    {
+    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f))); {
         Point center(0.0f, 0.0f, -3.0f);
         scene.add(new Sphere([center](const Point& point) {
             Vector v = (normalize(point - center) + Vector(1.0f, 1.0f, 1.0f)) / 2.0f;
@@ -56,10 +55,21 @@ Scene scene3() {
     Scene scene;
 
     /* ---- Lights ---- */
-
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
 
     /* ---- Objects ---- */
+    scene.add(new Plane([](const Point& point) {
+    return std::fmod(floor(point.x) + floor(point.z), 2.0f) == 0.0f ? White() : Black(); // Checker
+    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
 
+    {
+        std::vector<Point> positions;
+        read_positions("data/synthese/cube.obj", positions);
+
+        scene.add(positions, Vector(-2.0f, 0.0f, -3.0f), Red());
+        scene.add(positions, Vector(2.0f, 0.0f, -3.0f), Blue());
+        scene.add(positions, Vector(0.0f, 2.0f, -3.0f), Green());
+    }
 
     return scene;
 }
