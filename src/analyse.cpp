@@ -175,36 +175,8 @@ int main() {
 
     write_image_png(srgb(labels_img), "data/analyse/labels.png", false);
 
-    /* ---- Extract Pieces ---- */
-    std::filesystem::create_directory("data/analyse/pieces");
-    std::filesystem::create_directory("data/analyse/piece-masks");
-
-    unsigned int num_piece = 1;
-    for(const auto& [label, position] : labelPositions) {
-        unsigned int padding = 10;
-        unsigned int w = position.maxX - position.minX;
-        unsigned int h = position.maxY - position.minY;
-
-        Image piece(w + 2 * padding, h + 2 * padding, background);
-        Image piece_mask(w + 2 * padding, h + 2 * padding, White());
-
-        for(unsigned int j = 0 ; j < h ; ++j) {
-            for(unsigned int i = 0 ; i < w ; ++i) {
-                piece(i + padding, j + padding) = puzzle(i + position.minX, j + position.minY);
-                piece_mask(i + padding, j + padding) = Color(binaryMask(i + position.minX, j + position.minY));
-            }
-        }
-
-        std::string strNum = (num_piece < 10) ? '0' + std::to_string(num_piece) : std::to_string(num_piece);
-
-        write_image_png(srgb(piece), ("data/analyse/pieces/piece-" + strNum + ".png").c_str(), false);
-        write_image_png(srgb(piece_mask), ("data/analyse/piece-masks/piece-mask-" + strNum + ".png").c_str(), false);
-
-        ++num_piece;
-    }
-
     /* ---- Outline of pieces ---- */
-    Array2D<bool> Outline(width, height, false);
+    Array2D<bool> outline(width, height, false);
 
     for(const auto& [label, position] : labelPositions) {
         uvec2 first = { position.minX, position.minY };
@@ -216,7 +188,7 @@ int main() {
         bool found = false;
 
         do {
-            Outline(current.x, current.y) = true;
+            outline(current.x, current.y) = true;
 
             uvec2 neighbour;
             for(int j = -1 ; j <= 1 ; ++j) {
@@ -225,10 +197,9 @@ int main() {
                     neighbour = { current.x + i, current.y + j };
 
                     if(neighbour.x >= 0 && neighbour.y >= 0 && neighbour.x < width && neighbour.y < height
-                       && binaryMask(neighbour.x, neighbour.y)
-                       && !Outline(neighbour.x, neighbour.y)
-                       && applyStructuringElement(binaryMask, neighbour.x, neighbour.y, MathematicalMorphology::Square)
-                       >= 1) {
+                       && !binaryMask(neighbour.x, neighbour.y)
+                       && !outline(neighbour.x, neighbour.y)
+                       && 9 - applyStructuringElement(binaryMask, neighbour.x, neighbour.y, MathematicalMorphology::Square) >= 1) {
                         found = true;
                         break;
                     }
@@ -240,7 +211,39 @@ int main() {
             found = false;
         } while(current.x != first.x || current.y != first.y);
     }
-    write_boolean_array_as_grayscale_image("data/analyse/outline.png", Outline);
+    write_boolean_array_as_grayscale_image("data/analyse/outline.png", outline);
+
+    /* ---- Extract Pieces ---- */
+    std::filesystem::create_directory("data/analyse/pieces");
+    std::filesystem::create_directory("data/analyse/piece-masks");
+    std::filesystem::create_directory("data/analyse/piece-outlines");
+
+    unsigned int num_piece = 1;
+    for(const auto& [label, position] : labelPositions) {
+        unsigned int padding = 10;
+        unsigned int w = 1 + position.maxX - position.minX;
+        unsigned int h = 1 + position.maxY - position.minY;
+
+        Image piece(w + 2 * padding, h + 2 * padding, background);
+        Image piece_mask(w + 2 * padding, h + 2 * padding, White());
+        Image piece_outline(w + 2 * padding, h + 2 * padding, Black());
+
+        for(unsigned int j = 0 ; j < h ; ++j) {
+            for(unsigned int i = 0 ; i < w ; ++i) {
+                piece(i + padding, j + padding) = puzzle(i + position.minX, j + position.minY);
+                piece_mask(i + padding, j + padding) = Color(binaryMask(i + position.minX, j + position.minY));
+                piece_outline(i + padding, j + padding) = Color(outline(i + position.minX, j + position.minY));
+            }
+        }
+
+        std::string strNum = (num_piece < 10) ? '0' + std::to_string(num_piece) : std::to_string(num_piece);
+
+        write_image_png(srgb(piece), ("data/analyse/pieces/piece-" + strNum + ".png").c_str(), false);
+        write_image_png(srgb(piece_mask), ("data/analyse/piece-masks/piece-mask-" + strNum + ".png").c_str(), false);
+        write_image_png(srgb(piece_outline), ("data/analyse/piece-outlines/piece-outlines-" + strNum + ".png").c_str(), false);
+
+        ++num_piece;
+    }
 
     return 0;
 }
