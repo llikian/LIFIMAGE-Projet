@@ -66,3 +66,19 @@ void write_boolean_array_as_grayscale_image(const std::string& path, const Array
     stbi_flip_vertically_on_write(false);
     stbi_write_png(path.c_str(), data.rows, data.columns, 1, temp.data(), 0);
 }
+
+float length(const vec2& vec) {
+    return std::sqrt(vec.x * vec.x + vec.y * vec.y);
+}
+
+float length(const vec3& vec) {
+    return std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+
+float length(const vec4& vec) {
+    return std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z + vec.w * vec.w);
+}
+
+bool operator!=(const Vector& vec, const Vector& other) {
+    return vec.x != other.x || vec.y != other.y || vec.z != other.z;
+}
