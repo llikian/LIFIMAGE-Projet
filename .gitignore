@@ -3,4 +3,5 @@ bin
 build-debug
 build-release
 data/analyse/piece-masks
+data/analyse/piece-outlines
 data/analyse/pieces
