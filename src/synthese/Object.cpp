@@ -73,7 +73,7 @@ Triangle::Triangle(const std::function<Color(const Point&)>& getColor, const Poi
 Hit Triangle::intersect(const Ray& ray) const {
     Hit hit;
 
-    hit.normal = cross(B - A, C - A);
+    hit.normal = normalize(cross(B - A, C - A));
     hit.intersection = dot(hit.normal, A - ray.origin) / dot(hit.normal, ray.direction);
 
     if(hit.intersection < 0.0f) {

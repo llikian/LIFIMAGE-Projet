@@ -5,7 +5,10 @@
 
 #pragma once
 
+#include <cmath>
 #include <string>
+#include <vec.h>
+
 #include "Array2D.hpp"
 #include "color.h"
 
@@ -30,3 +33,17 @@ template<typename Type>
 Color lerp(const Type& A, const Type& B, float t) {
     return A * (1.0f - t) + B * t;
 }
+
+float length(const vec2& vec);
+float length(const vec3& vec);
+float length(const vec4& vec);
+
+inline float radians(float deg) {
+    return deg * M_PIf / 180.0f;
+}
+
+inline float degrees(float rad) {
+    return rad * 180.0f / M_PIf;
+}
+
+bool operator!=(const Vector& vec, const Vector& other);

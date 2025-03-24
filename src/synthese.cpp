@@ -6,7 +6,10 @@
 #include "synthese/Scene.hpp"
 
 #include <iostream>
+#include <synthese/transforms.hpp>
+
 #include "mesh_io.h"
+#include "utility.hpp"
 
 Scene scene1() {
     Scene scene;
@@ -59,17 +62,70 @@ Scene scene3() {
 
     /* ---- Objects ---- */
     scene.add(new Plane([](const Point& point) {
-    return std::fmod(floor(point.x) + floor(point.z), 2.0f) == 0.0f ? White() : Black(); // Checker
-    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
-
-    {
+        return std::fmod(floor(point.x) + floor(point.z), 2.0f) == 0.0f ? White() : Black(); // Checker
+    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f))); {
         std::vector<Point> positions;
         read_positions("data/synthese/cube.obj", positions);
 
-        scene.add(positions, Vector(-2.0f, 0.0f, -3.0f), Red());
-        scene.add(positions, Vector(2.0f, 0.0f, -3.0f), Blue());
-        scene.add(positions, Vector(0.0f, 2.0f, -3.0f), Green());
+        scene.add(positions, translate(-2.0f, 0.0f, -3.0f), Red());
+        scene.add(positions, translate(2.0f, 0.0f, -3.0f), Blue());
+        scene.add(positions, translate(0.0f, 2.0f, -3.0f), Green());
     }
+
+    return scene;
+}
+
+Scene scene4() {
+    Scene scene;
+
+    /* ---- Lights ---- */
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 4.0f)));
+
+    /* ---- Objects ---- */
+    scene.add(new Plane([](const Point& point) {
+        float t = std::fmod(std::floor(point.x) + std::floor(point.z), 2.0f);
+        return t == 0.0f ? Color(0.922f, 0.216f, 0.216f) : White(); // Checker
+    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+
+    /* Sphere 1 */ {
+        Point pos = Point(0.0f, 0.0f, -2.5f);
+        scene.add(new Sphere([pos](const Point& point) {
+            Vector v = point - pos;
+            float t = 0.5f + 0.5f * std::cos(15.0f * M_PIf * std::sqrt(std::abs(2.0f * v.y * v.x)));
+            return lerp(Color(0.216f, 0.51f, 0.922f), Blue(), t);
+        }, pos, 1.0f));
+    }
+
+    /* Sphere 2 */ {
+        Point pos = Point(-2.5f, 0.0f, -2.5f);
+        scene.add(new Sphere([pos](const Point& point) {
+            Vector v = point - pos;
+            float t = 0.5f + 0.5f * std::cos(15.0f * M_PIf * std::sqrt(std::abs(2.0f * v.y * v.x)));
+            return lerp(Color(0.922f, 0.216f, 0.51f), Red(), t);
+        }, pos, 1.0f));
+    }
+
+    /* Sphere 3 */ {
+        Point pos = Point(2.5f, 0.0f, -2.5f);
+        scene.add(new Sphere([pos](const Point& point) {
+            Vector v = point - pos;
+            float t = 0.5f + 0.5f * std::cos(15.0f * M_PIf * std::sqrt(std::abs(2.0f * v.y * v.x)));
+            return lerp(Color(0.216f, 0.922f, 0.51f), Green(), t);
+        }, pos, 1.0f));
+    }
+
+    return scene;
+}
+
+Scene scene5() {
+    Scene scene;
+
+    /* ---- Lights ---- */
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
+
+    /* ---- Objects ---- */
+    scene.add("data/synthese/dodecahedron.obj", translate(-2.0f, 0.0f, -4.0f).scale(2.0f), Red());
+    scene.add("data/synthese/cube.obj", translate(2.0f, 0.0f, -4.0f).scale(0.5f), Red());
 
     return scene;
 }
@@ -78,7 +134,9 @@ int main() {
     try {
         // scene1().render("data/synthese/scene1.png", 1024, 512);
         // scene2().render("data/synthese/scene2.png", 1024, 512);
-        scene3().render("data/synthese/scene3.png", 1024, 512);
+        // scene3().render("data/synthese/scene3.png", 1024, 512);
+        // scene4().render("data/synthese/scene4.png", 1024, 512);
+        scene5().render("data/synthese/scene5.png", 1024, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

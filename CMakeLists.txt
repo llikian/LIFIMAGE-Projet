@@ -22,7 +22,7 @@ set(SOURCES
         lib/gkit3/src/color.cpp
         lib/gkit3/src/files.cpp
         lib/gkit3/src/image_io.cpp
-        lib/gkit3/src/mat.cpp
+#        lib/gkit3/src/mat.cpp
         lib/gkit3/src/mesh_io.cpp
         lib/gkit3/src/vec.cpp
 )
@@ -46,9 +46,11 @@ add_executable(Synthese src/synthese.cpp
         ${SOURCES}
         src/synthese/Hit.cpp
         src/synthese/Light.cpp
+        src/synthese/mat4.cpp
         src/synthese/Object.cpp
         src/synthese/Ray.cpp
         src/synthese/Scene.cpp
+        src/synthese/transforms.cpp
 )
 target_include_directories(Synthese PUBLIC ${INCLUDES})
 
