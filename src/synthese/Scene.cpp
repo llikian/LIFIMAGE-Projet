@@ -153,12 +153,10 @@ Hit Scene::getClosestHit(const Ray& ray) const {
     for(const Object* object : objects) {
         Hit hit = object->intersect(ray);
 
-        if(hit.intersection != infinity) {
-            if(closest.object == nullptr || hit.intersection < closest.intersection) {
-                closest.intersection = hit.intersection;
-                closest.normal = hit.normal;
-                closest.object = object;
-            }
+        if(hit.intersection != infinity && (closest.object == nullptr || hit.intersection < closest.intersection)) {
+            closest.intersection = hit.intersection;
+            closest.normal = hit.normal;
+            closest.object = object;
         }
     }
 

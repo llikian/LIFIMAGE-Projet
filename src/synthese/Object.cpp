@@ -51,7 +51,14 @@ Hit Sphere::intersect(const Ray& ray) const {
     float delta = std::sqrt(b * b - 4.0f * a * c);
 
     if(delta > 0.0f) {
-        hit.intersection = std::min((-b + delta) / 2.0f * a, -(b + delta) / 2.0f * a);
+        hit.intersection = infinity;
+
+        float x1 = (-b + delta) / 2.0f * a;
+        float x2 = (-b - delta) / 2.0f * a;
+
+        if(x1 >= 0.0f) { hit.intersection = x1; }
+        if(x2 >= 0.0f && x2 < hit.intersection) { hit.intersection = x2; }
+        if(hit.intersection == infinity) { return hit; }
     } else if(delta == 0.0f) {
         hit.intersection = -b / 2.0f * a;
     } else {
