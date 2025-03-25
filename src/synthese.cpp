@@ -132,10 +132,10 @@ Scene scene5() {
 
 int main() {
     try {
-        // scene1().render("data/synthese/scene1.png", 1024, 512);
-        // scene2().render("data/synthese/scene2.png", 1024, 512);
-        // scene3().render("data/synthese/scene3.png", 1024, 512);
-        // scene4().render("data/synthese/scene4.png", 1024, 512);
+        scene1().render("data/synthese/scene1.png", 1024, 512);
+        scene2().render("data/synthese/scene2.png", 1024, 512);
+        scene3().render("data/synthese/scene3.png", 1024, 512);
+        scene4().render("data/synthese/scene4.png", 1024, 512);
         scene5().render("data/synthese/scene5.png", 1024, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';

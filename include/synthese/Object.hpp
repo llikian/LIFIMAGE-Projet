@@ -6,6 +6,7 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 #include "color.h"
 #include "Hit.hpp"
 #include "Ray.hpp"
@@ -24,6 +25,8 @@ struct Object {
 
     std::function<Color(const Point&)> getColor;
 };
+
+Hit getClosestHit(const Ray& ray, const std::vector<const Object*>& objects);
 
 struct Plane : Object {
     Plane(const Color& color, const Point& point, const Vector& normal);

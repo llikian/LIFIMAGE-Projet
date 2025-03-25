@@ -74,6 +74,30 @@ void Scene::add(const std::vector<Point>& meshData, const mat4& transform, const
     }
 }
 
+const std::vector<const Light*>& Scene::getLights() const {
+    return lights;
+}
+
+const std::vector<const Object*>& Scene::getObjects() const {
+    return objects;
+}
+
+Hit Scene::getClosestHit(const Ray& ray) const {
+    Hit closest;
+
+    for(const Object* object : objects) {
+        Hit hit = object->intersect(ray);
+
+        if(hit.intersection != infinity && (closest.object == nullptr || hit.intersection < closest.intersection)) {
+            closest.intersection = hit.intersection;
+            closest.normal = hit.normal;
+            closest.object = object;
+        }
+    }
+
+    return closest;
+}
+
 void Scene::computeImage(Image& image) {
     static std::mutex mutex;
 
@@ -119,46 +143,20 @@ Color Scene::computePixel(Point extremity) const {
 
     const Ray ray(camera, normalize(Vector(camera, extremity)));
 
-    Hit hit = getClosestHit(ray);
-    if(hit.object == nullptr) {
+    Hit closest = getClosestHit(ray);
+    if(closest.object == nullptr) {
         static const Color darkSky(0.239f, 0.29f, 0.761f);
         static const Color lightSky(0.671f, 0.851f, 1.0f);
 
         return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f);
     }
 
-    Point point = ray.getPoint(hit.intersection);
-    Point epsilonPoint = ray.getEpsilonPoint(hit);
-    Color color = static_cast<const Object*>(hit.object)->getColor(point);
+    Point point = ray.getPoint(closest.intersection);
+    Point epsilonPoint = ray.getEpsilonPoint(closest);
+    Color color = static_cast<const Object*>(closest.object)->getColor(point);
 
-    Ray lightRay(epsilonPoint, Vector());
     Color lightColor;
-
-    for(const Light* light : lights) {
-        // Lighting: Needs to be before getClosestHit because it defines lightRay.direction
-        Color lighting = light->calculate(hit, lightRay);
-
-        Hit closest = getClosestHit(lightRay);
-        if(closest.object == nullptr || closest.object == hit.object) {
-            lightColor += lighting;
-        }
-    }
+    for(const Light* light : lights) { lightColor += light->calculate(closest, epsilonPoint, objects); }
 
     return color * lightColor;
-}
-
-Hit Scene::getClosestHit(const Ray& ray) const {
-    Hit closest;
-
-    for(const Object* object : objects) {
-        Hit hit = object->intersect(ray);
-
-        if(hit.intersection != infinity && (closest.object == nullptr || hit.intersection < closest.intersection)) {
-            closest.intersection = hit.intersection;
-            closest.normal = hit.normal;
-            closest.object = object;
-        }
-    }
-
-    return closest;
 }

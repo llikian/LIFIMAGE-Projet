@@ -11,7 +11,23 @@ Object::Object(const Color& color)
     : getColor([color](const Point&) { return color; }) { }
 
 Object::Object(const std::function<Color(const Point&)>& getColor)
-    : getColor(getColor) { }
+: getColor(getColor) { }
+
+Hit getClosestHit(const Ray& ray, const std::vector<const Object*>& objects) {
+    Hit closest;
+
+    for(const Object* object : objects) {
+        Hit hit = object->intersect(ray);
+
+        if(hit.intersection != infinity && (closest.object == nullptr || hit.intersection < closest.intersection)) {
+            closest.intersection = hit.intersection;
+            closest.normal = hit.normal;
+            closest.object = object;
+        }
+    }
+
+    return closest;
+}
 
 Plane::Plane(const Color& color, const Point& point, const Vector& normal)
     : Object(color), point(point), normal(normalize(normal)) { }

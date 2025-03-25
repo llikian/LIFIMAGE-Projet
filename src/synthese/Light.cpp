@@ -9,23 +9,36 @@
 
 Light::Light(const Color& color) : color(color) { }
 
+bool Light::isInShadow(const void* object, const Ray& ray, const std::vector<const Object*>& objects) const {
+    Hit closest = getClosestHit(ray, objects);
+    return closest.object != nullptr && closest.object != object;
+}
+
 DirectionalLight::DirectionalLight(const Color& color, const Vector& direction)
     : Light(color), direction(normalize(direction)) { }
 
-Color DirectionalLight::calculate(const Hit& hit, Ray& ray) const {
-    ray.direction = direction;
-    return color * std::max(dot(hit.normal, ray.direction), 0.0f);
+Color DirectionalLight::calculate(const Hit& hit, const Point& point, const std::vector<const Object*>& objects) const {
+    Ray ray(point, direction);
+
+    if(isInShadow(hit.object, ray, objects)) { return Black(); }
+
+    float cos_theta = std::max(dot(hit.normal, ray.direction), 0.0f);
+
+    return color * cos_theta;
 }
 
 PointLight::PointLight(const Color& color, const Point& position, float radius)
     : Light(color), position(position), radius(radius) { }
 
-Color PointLight::calculate(const Hit& hit, Ray& ray) const {
-    ray.direction = position - ray.origin;
+Color PointLight::calculate(const Hit& hit, const Point& point, const std::vector<const Object*>& objects) const {
+    Ray ray(point, position - point);
     float distance = length(ray.direction);
     ray.direction = ray.direction / distance;
 
-    float attenuation = std::max(radius * radius / (distance * distance), 0.0f);
+    if(isInShadow(hit.object, ray, objects)) { return Black(); }
 
-    return color * attenuation * std::max(dot(hit.normal, ray.direction), 0.0f);
+    float attenuation = std::max(radius * radius / (distance * distance), 0.0f);
+    float cos_theta = std::max(dot(hit.normal, ray.direction), 0.0f);
+
+    return color * attenuation * cos_theta;
 }

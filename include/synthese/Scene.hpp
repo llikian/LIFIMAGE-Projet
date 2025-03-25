@@ -31,10 +31,14 @@ public:
     void add(const std::string& meshPath, const mat4& transform, const Color& color = White());
     void add(const std::vector<Point>& meshData, const mat4& transform, const Color& color = White());
 
+    const std::vector<const Light*>& getLights() const;
+    const std::vector<const Object*>& getObjects() const;
+
+    Hit getClosestHit(const Ray& ray) const;
+
 private:
     void computeImage(Image& image);
     Color computePixel(Point extremity) const;
-    Hit getClosestHit(const Ray& ray) const;
 
     Point camera;
     std::vector<const Light*> lights;
