@@ -9,7 +9,7 @@
 
 Light::Light(const Color& color) : color(color) { }
 
-bool Light::isInShadow(const void* object, const Ray& ray, const std::vector<const Object*>& objects) const {
+bool Light::isInShadow(const Object* object, const Ray& ray, const std::vector<const Object*>& objects) {
     Hit closest = getClosestHit(ray, objects);
     return closest.object != nullptr && closest.object != object;
 }

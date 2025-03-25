@@ -153,7 +153,7 @@ Color Scene::computePixel(Point extremity) const {
 
     Point point = ray.getPoint(closest.intersection);
     Point epsilonPoint = ray.getEpsilonPoint(closest);
-    Color color = static_cast<const Object*>(closest.object)->getColor(point);
+    Color color = closest.object->getColor(point);
 
     Color lightColor;
     for(const Light* light : lights) { lightColor += light->calculate(closest, epsilonPoint, objects); }

@@ -16,8 +16,7 @@ struct Light {
     virtual ~Light() = default;
 
     virtual Color calculate(const Hit& hit, const Point& point, const std::vector<const Object*>& objects) const = 0;
-
-    bool isInShadow(const void* object, const Ray& ray, const std::vector<const Object*>& objects) const;
+    static bool isInShadow(const Object* object, const Ray& ray, const std::vector<const Object*>& objects);
 
     Color color;
 };
