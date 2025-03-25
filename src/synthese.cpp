@@ -137,8 +137,10 @@ Scene scene6() {
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 10.0f)));
 
     /* ---- Objects ---- */
-    scene.add("data/synthese/test.obj", translate(-1.5f, 0.0f, -2.0f), White(), true);
-    scene.add("data/synthese/test.obj", translate(1.5f, 0.0f, -2.0f), White(), false);
+    MeshIOData suzanne;
+    read_meshio_data("data/synthese/suzanne.obj", suzanne);
+    scene.add(suzanne, translate(-1.5f, 0.0f, -2.0f), White(), true);
+    scene.add(suzanne, translate(1.5f, 0.0f, -2.0f), White(), false);
 
     return scene;
 }
