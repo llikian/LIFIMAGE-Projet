@@ -130,13 +130,26 @@ Scene scene5() {
     return scene;
 }
 
+Scene scene6() {
+    Scene scene;
+
+    /* ---- Lights ---- */
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 10.0f)));
+
+    /* ---- Objects ---- */
+    scene.add("data/synthese/monke.obj", translate(0.0f, 0.0f, -2.0f), White());
+
+    return scene;
+}
+
 int main() {
     try {
-        scene1().render("data/synthese/scene1.png", 1024, 512);
-        scene2().render("data/synthese/scene2.png", 1024, 512);
-        scene3().render("data/synthese/scene3.png", 1024, 512);
-        scene4().render("data/synthese/scene4.png", 1024, 512);
-        scene5().render("data/synthese/scene5.png", 1024, 512);
+        // scene1().render("data/synthese/scene1.png", 1024, 512);
+        // scene2().render("data/synthese/scene2.png", 1024, 512);
+        // scene3().render("data/synthese/scene3.png", 1024, 512);
+        // scene4().render("data/synthese/scene4.png", 1024, 512);
+        // scene5().render("data/synthese/scene5.png", 1024, 512);
+        scene6().render("data/synthese/scene6.png", 512, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

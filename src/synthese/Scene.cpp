@@ -74,14 +74,6 @@ void Scene::add(const std::vector<Point>& meshData, const mat4& transform, const
     }
 }
 
-const std::vector<const Light*>& Scene::getLights() const {
-    return lights;
-}
-
-const std::vector<const Object*>& Scene::getObjects() const {
-    return objects;
-}
-
 Hit Scene::getClosestHit(const Ray& ray) const {
     Hit closest;
 
@@ -145,8 +137,8 @@ Color Scene::computePixel(Point extremity) const {
 
     Hit closest = getClosestHit(ray);
     if(closest.object == nullptr) {
-        static const Color darkSky(0.239f, 0.29f, 0.761f);
         static const Color lightSky(0.671f, 0.851f, 1.0f);
+        static const Color darkSky(0.239f, 0.29f, 0.761f);
 
         return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f);
     }
