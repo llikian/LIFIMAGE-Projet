@@ -50,6 +50,7 @@ add_executable(Synthese src/synthese.cpp
         src/synthese/Ray.cpp
         src/synthese/Scene.cpp
         src/synthese/transforms.cpp
+        src/synthese/Vertex.cpp
 )
 target_include_directories(Synthese PUBLIC ${INCLUDES})
 

@@ -10,8 +10,8 @@
 Object::Object(const Color& color)
     : getColor([color](const Point&) { return color; }) { }
 
-Object::Object(const std::function<Color(const Point&)>& getColor)
-: getColor(getColor) { }
+Object::Object(const ColorFunc& getColor)
+    : getColor(getColor) { }
 
 Hit getClosestHit(const Ray& ray, const std::vector<const Object*>& objects) {
     Hit closest;
@@ -32,18 +32,14 @@ Hit getClosestHit(const Ray& ray, const std::vector<const Object*>& objects) {
 Plane::Plane(const Color& color, const Point& point, const Vector& normal)
     : Object(color), point(point), normal(normalize(normal)) { }
 
-Plane::Plane(const std::function<Color(const Point&)>& getColor, const Point& point, const Vector& normal)
+Plane::Plane(const ColorFunc& getColor, const Point& point, const Vector& normal)
     : Object(getColor), point(point), normal(normalize(normal)) { }
 
 Hit Plane::intersect(const Ray& ray) const {
     Hit hit;
 
     hit.intersection = dot(normal, point - ray.origin) / dot(normal, ray.direction);
-
-    if(hit.intersection < 0.0f) {
-        hit.intersection = infinity;
-    }
-
+    if(hit.intersection < 0.0f) { return Hit(); }
     hit.normal = normal;
 
     return hit;
@@ -52,7 +48,7 @@ Hit Plane::intersect(const Ray& ray) const {
 Sphere::Sphere(const Color& color, const Point& center, float radius)
     : Object(color), center(center), radius(radius) { }
 
-Sphere::Sphere(const std::function<Color(const Point&)>& getColor, const Point& center, float radius)
+Sphere::Sphere(const ColorFunc& getColor, const Point& center, float radius)
     : Object(getColor), center(center), radius(radius) { }
 
 Hit Sphere::intersect(const Ray& ray) const {
@@ -74,12 +70,11 @@ Hit Sphere::intersect(const Ray& ray) const {
 
         if(x1 >= 0.0f) { hit.intersection = x1; }
         if(x2 >= 0.0f && x2 < hit.intersection) { hit.intersection = x2; }
-        if(hit.intersection == infinity) { return hit; }
+        if(hit.intersection == infinity) { return Hit(); }
     } else if(delta == 0.0f) {
         hit.intersection = -b / 2.0f * a;
     } else {
-        hit.intersection = infinity;
-        return hit;
+        return Hit();
     }
 
     hit.normal = normalize(ray.getPoint(hit.intersection) - center);
@@ -90,7 +85,7 @@ Hit Sphere::intersect(const Ray& ray) const {
 Triangle::Triangle(const Color& color, const Point& A, const Point& B, const Point& C)
     : Object(color), A(A), B(B), C(C) { }
 
-Triangle::Triangle(const std::function<Color(const Point&)>& getColor, const Point& A, const Point& B, const Point& C)
+Triangle::Triangle(const ColorFunc& getColor, const Point& A, const Point& B, const Point& C)
     : Object(getColor), A(A), B(B), C(C) { }
 
 Hit Triangle::intersect(const Ray& ray) const {
@@ -99,15 +94,47 @@ Hit Triangle::intersect(const Ray& ray) const {
     hit.normal = normalize(cross(B - A, C - A));
     hit.intersection = dot(hit.normal, A - ray.origin) / dot(hit.normal, ray.direction);
 
-    if(hit.intersection < 0.0f) {
-        hit.intersection = infinity;
-    } else {
-        Point point = ray.getPoint(hit.intersection);
+    if(hit.intersection < 0.0f) { return Hit(); }
+    Point point = ray.getPoint(hit.intersection);
 
-        if(dot(hit.normal, cross(Vector(A, B), Vector(A, point))) < 0.0f) { hit.intersection = infinity; }
-        if(dot(hit.normal, cross(Vector(B, C), Vector(B, point))) < 0.0f) { hit.intersection = infinity; }
-        if(dot(hit.normal, cross(Vector(C, A), Vector(C, point))) < 0.0f) { hit.intersection = infinity; }
-    }
+    if(dot(hit.normal, cross(B - A, point - A)) < 0.0f) { return Hit(); }
+    if(dot(hit.normal, cross(C - B, point - B)) < 0.0f) { return Hit(); }
+    if(dot(hit.normal, cross(A - C, point - C)) < 0.0f) { return Hit(); }
+
+    return hit;
+}
+
+MeshTriangle::MeshTriangle(const Color& color, const Vertex& A, const Vertex& B, const Vertex& C)
+    : Object(color), A(A), B(B), C(C) { }
+
+MeshTriangle::MeshTriangle(const ColorFunc& getColor, const Vertex& A, const Vertex& B, const Vertex& C)
+    : Object(getColor), A(A), B(B), C(C) { }
+
+Hit MeshTriangle::intersect(const Ray& ray) const {
+    Hit hit;
+
+    hit.normal = cross(B.position - A.position, C.position - A.position);
+    float area2 = length(hit.normal); // 2 times the area of triangle ABC
+    hit.normal = hit.normal / area2;
+
+    hit.intersection = dot(hit.normal, A.position - ray.origin) / dot(hit.normal, ray.direction);
+
+    if(hit.intersection < 0.0f) { return Hit(); }
+
+    Point point = ray.getPoint(hit.intersection);
+
+    Vector BCP = cross(C.position - B.position, point - B.position);
+    Vector CAP = cross(A.position - C.position, point - C.position);
+
+    if(dot(hit.normal, cross(B.position - A.position, point - A.position)) < 0.0f) { return Hit(); }
+    if(dot(hit.normal, BCP) < 0.0f) { return Hit(); }
+    if(dot(hit.normal, CAP) < 0.0f) { return Hit(); }
+
+    float u = length(BCP) / area2;
+    float v = length(CAP) / area2;
+    float w = 1.0f - u - v;
+
+    hit.normal = normalize(u * A.normal + v * B.normal + w * C.normal);
 
     return hit;
 }

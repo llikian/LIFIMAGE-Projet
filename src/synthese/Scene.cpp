@@ -53,24 +53,37 @@ void Scene::add(const Object* object) {
     objects.push_back(object);
 }
 
-void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color) {
-    std::vector<Point> positions;
-    read_positions(meshPath.c_str(), positions);
+void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color, bool smooth) {
+    MeshIOData data;
+    read_meshio_data(meshPath.c_str(), data);
+    add(data, transform, color, smooth);
+}
 
+void Scene::add(const MeshIOData& data, const mat4& transform, const Color& color, bool smooth) {
+    for(unsigned int i = 0 ; i + 2 < data.indices.size() ; i += 3) {
+        unsigned int index0 = data.indices.at(i);
+        unsigned int index1 = data.indices.at(i + 1);
+        unsigned int index2 = data.indices.at(i + 2);
+        if(smooth) {
+            add(new MeshTriangle(color,
+                                 Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
+                                 Vertex(transform * data.positions.at(index1), data.normals.at(index1)),
+                                 Vertex(transform * data.positions.at(index2), data.normals.at(index2))));
+        } else {
+            add(new Triangle(color,
+                             transform * data.positions.at(index0),
+                             transform * data.positions.at(index1),
+                             transform * data.positions.at(index2)));
+        }
+    }
+}
+
+void Scene::add(const std::vector<Point>& positions, const mat4& transform, const Color& color) {
     for(unsigned int i = 0 ; i + 2 < positions.size() ; i += 3) {
         add(new Triangle(color,
                          transform * positions[i],
                          transform * positions[i + 1],
                          transform * positions[i + 2]));
-    }
-}
-
-void Scene::add(const std::vector<Point>& meshData, const mat4& transform, const Color& color) {
-    for(unsigned int i = 0 ; i + 2 < meshData.size() ; i += 3) {
-        add(new Triangle(color,
-                         transform * meshData[i],
-                         transform * meshData[i + 1],
-                         transform * meshData[i + 2]));
     }
 }
 
