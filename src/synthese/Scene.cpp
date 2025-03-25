@@ -12,7 +12,7 @@
 #include "mesh_io.h"
 #include "utility.hpp"
 
-Scene::Scene() : globalRow(0) { }
+Scene::Scene() : globalRow(0), lightSky(0.671f, 0.851f, 1.0f), darkSky(0.239f, 0.29f, 0.761f) { }
 
 Scene::~Scene() {
     for(const Object* object : objects) { delete object; }
@@ -40,7 +40,7 @@ void Scene::render(const std::string& path, unsigned int width, unsigned int hei
     }
 
     std::chrono::duration<float> duration = std::chrono::high_resolution_clock::now() - startTime;
-    std::cout << "The image took " << duration.count() << "s to compute.\n";
+    std::cout << "The image took " << duration.count() << "s to compute.\n\n";
 
     write_image(image, path.c_str());
 }
@@ -64,6 +64,7 @@ void Scene::add(const MeshIOData& data, const mat4& transform, const Color& colo
         unsigned int index0 = data.indices.at(i);
         unsigned int index1 = data.indices.at(i + 1);
         unsigned int index2 = data.indices.at(i + 2);
+
         if(smooth) {
             add(new MeshTriangle(color,
                                  Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
@@ -101,6 +102,18 @@ Hit Scene::getClosestHit(const Ray& ray) const {
     }
 
     return closest;
+}
+
+void Scene::setLightSkyColor(float r, float g, float b) {
+    lightSky.r = r;
+    lightSky.g = g;
+    lightSky.b = b;
+}
+
+void Scene::setDarkSkyColor(float r, float g, float b) {
+    darkSky.r = r;
+    darkSky.g = g;
+    darkSky.b = b;
 }
 
 void Scene::computeImage(Image& image) {
@@ -150,9 +163,6 @@ Color Scene::computePixel(Point extremity) const {
 
     Hit closest = getClosestHit(ray);
     if(closest.object == nullptr) {
-        static const Color lightSky(0.671f, 0.851f, 1.0f);
-        static const Color darkSky(0.239f, 0.29f, 0.761f);
-
         return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f);
     }
 

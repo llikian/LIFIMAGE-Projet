@@ -122,6 +122,7 @@ Scene scene5() {
 
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(4.0f, 6.0f, 1.0f)));
 
     /* ---- Objects ---- */
     scene.add("data/synthese/dodecahedron.obj", translate(-2.0f, 0.0f, -4.0f).scale(2.0f), White());
@@ -133,14 +134,18 @@ Scene scene5() {
 Scene scene6() {
     Scene scene;
 
+    /* ---- Sky ---- */
+    scene.setLightSkyColor(0.3f, 0.3f, 0.3f);
+    scene.setDarkSkyColor(0.1f, 0.1f, 0.1f);
+
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 10.0f)));
 
     /* ---- Objects ---- */
     MeshIOData suzanne;
     read_meshio_data("data/synthese/suzanne.obj", suzanne);
-    scene.add(suzanne, translate(-1.5f, 0.0f, -2.0f), White(), true);
-    scene.add(suzanne, translate(1.5f, 0.0f, -2.0f), White(), false);
+    scene.add(suzanne, translate(-1.0f, 0.2f, -2.0f).rotateY(-10.0f), White(), true);
+    scene.add(suzanne, translate(1.0f, -0.2f, -2.0f).rotateY(10.0f).rotateZ(180.0f), White(), false);
 
     return scene;
 }
@@ -152,7 +157,7 @@ int main() {
         // scene3().render("data/synthese/scene3.png", 1024, 512);
         // scene4().render("data/synthese/scene4.png", 1024, 512);
         // scene5().render("data/synthese/scene5.png", 1024, 512);
-        scene6().render("data/synthese/scene6.png", 1024, 512);
+        scene6().render("data/synthese/scene6.png", 768, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

@@ -34,13 +34,19 @@ public:
 
     Hit getClosestHit(const Ray& ray) const;
 
+    void setLightSkyColor(float r, float g, float b);
+    void setDarkSkyColor(float r, float g, float b);
+
 private:
     void computeImage(Image& image);
     Color computePixel(Point extremity) const;
+
+    unsigned int globalRow;
 
     Point camera;
     std::vector<const Light*> lights;
     std::vector<const Object*> objects;
 
-    unsigned int globalRow;
+    Color lightSky;
+    Color darkSky;
 };
