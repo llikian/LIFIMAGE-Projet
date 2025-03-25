@@ -137,7 +137,7 @@ Scene scene6() {
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 10.0f)));
 
     /* ---- Objects ---- */
-    scene.add("data/synthese/monke.obj", translate(0.0f, 0.0f, -2.0f), Color(0.988f, 0.616f, 0.757f));
+    scene.add("data/synthese/monke.obj", translate(0.0f, 0.0f, -2.0f), White());
 
     return scene;
 }

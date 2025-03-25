@@ -57,20 +57,20 @@ void Scene::add(const std::string& meshPath, const mat4& transform, const Color&
     std::vector<Point> positions;
     read_positions(meshPath.c_str(), positions);
 
-    for(unsigned int i = 0 ; i < positions.size() / 3 ; i++) {
+    for(unsigned int i = 0 ; i + 2 < positions.size() ; i += 3) {
         add(new Triangle(color,
-                         transform * positions[3 * i],
-                         transform * positions[3 * i + 1],
-                         transform * positions[3 * i + 2]));
+                         transform * positions[i],
+                         transform * positions[i + 1],
+                         transform * positions[i + 2]));
     }
 }
 
 void Scene::add(const std::vector<Point>& meshData, const mat4& transform, const Color& color) {
-    for(unsigned int i = 0 ; i < meshData.size() / 3 ; i++) {
+    for(unsigned int i = 0 ; i + 2 < meshData.size() ; i += 3) {
         add(new Triangle(color,
-                         transform * meshData[3 * i],
-                         transform * meshData[3 * i + 1],
-                         transform * meshData[3 * i + 2]));
+                         transform * meshData[i],
+                         transform * meshData[i + 1],
+                         transform * meshData[i + 2]));
     }
 }
 
