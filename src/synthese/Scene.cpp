@@ -162,9 +162,7 @@ Color Scene::computePixel(Point extremity) const {
     const Ray ray(camera, normalize(Vector(camera, extremity)));
 
     Hit closest = getClosestHit(ray);
-    if(closest.object == nullptr) {
-        return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f);
-    }
+    if(closest.object == nullptr) { return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f); }
 
     Point point = ray.getPoint(closest.intersection);
     Point epsilonPoint = ray.getEpsilonPoint(closest);

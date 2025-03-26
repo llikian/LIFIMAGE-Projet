@@ -37,10 +37,9 @@ Scene scene2() {
 
     /* ---- Lights ---- */
     {
-        float radius = 2.0f;
-        // scene.add(new PointLight(Red(), Point(0.0f, 0.01f, -3.0f), radius));
-        scene.add(new PointLight(Green(), Point(2.0f, 1.0f, -1.0f), radius));
+        float radius = 6.0f;
         scene.add(new PointLight(Blue(), Point(-2.0f, 1.0f, -1.0f), radius));
+        scene.add(new PointLight(Red(), Point(2.0f, 1.0f, -1.0f), radius));
     }
 
     /* ---- Objects ---- */
@@ -139,9 +138,8 @@ Scene scene6() {
     scene.setDarkSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
-    // scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 10.0f)));
-    scene.add(new PointLight(White(), Point(-2.0f, 2.0f, 0.0f), 2.0f));
-    scene.add(new PointLight(White(), Point(2.0f, -2.0f, 0.0f), 2.0f));
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-2.0f, 2.0f, 1.0f)));
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(2.0f, -2.0f, 1.0f)));
 
     /* ---- Objects ---- */
     MeshIOData suzanne;
@@ -155,11 +153,11 @@ Scene scene6() {
 int main() {
     try {
         // scene1().render("data/synthese/scene1.png", 1024, 512);
-        scene2().render("data/synthese/scene2.png", 1024, 512);
+        // scene2().render("data/synthese/scene2.png", 1024, 512);
         // scene3().render("data/synthese/scene3.png", 1024, 512);
         // scene4().render("data/synthese/scene4.png", 1024, 512);
         // scene5().render("data/synthese/scene5.png", 1024, 512);
-        // scene6().render("data/synthese/scene6.png", 768, 512);
+        scene6().render("data/synthese/scene6.png", 768, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

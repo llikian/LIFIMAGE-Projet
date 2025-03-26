@@ -29,6 +29,22 @@ Hit getClosestHit(const Ray& ray, const std::vector<const Object*>& objects) {
     return closest;
 }
 
+const Object* getClosestObject(const Ray& ray, const std::vector<const Object*>& objects) {
+    float intersection = infinity;
+    const Object* obj = nullptr;
+
+    for(const Object* object : objects) {
+        Hit hit = object->intersect(ray);
+
+        if(hit.intersection != infinity && (obj == nullptr || hit.intersection < intersection)) {
+            intersection = hit.intersection;
+            obj = object;
+        }
+    }
+
+    return obj;
+}
+
 Plane::Plane(const Color& color, const Point& point, const Vector& normal)
     : Object(color), point(point), normal(normalize(normal)) { }
 
@@ -56,26 +72,20 @@ Hit Sphere::intersect(const Ray& ray) const {
 
     Vector co(center, ray.origin);
 
-    float a = dot(ray.direction, ray.direction);
+    // float a = dot(ray.direction, ray.direction); // ray.direction is normalized so this always equals 1
     float b = 2.0f * dot(ray.direction, co);
     float c = dot(co, co) - radius * radius;
 
-    float delta = std::sqrt(b * b - 4.0f * a * c);
+    float delta = std::sqrt(b * b - 4.0f * c);
 
-    if(delta > 0.0f) {
-        hit.intersection = infinity;
+    if(delta < 0.0f) { return Hit(); }
 
-        float x1 = (-b + delta) / 2.0f * a;
-        float x2 = (-b - delta) / 2.0f * a;
+    float x1 = (-b + delta) / 2.0f;
+    float x2 = (-b - delta) / 2.0f;
 
-        if(x1 >= 0.0f) { hit.intersection = x1; }
-        if(x2 >= 0.0f && x2 < hit.intersection) { hit.intersection = x2; }
-        if(hit.intersection == infinity) { return Hit(); }
-    } else if(delta == 0.0f) {
-        hit.intersection = -b / 2.0f * a;
-    } else {
-        return Hit();
-    }
+    if(x1 >= 0.0f) { hit.intersection = x1; }
+    if(x2 >= 0.0f && x2 < hit.intersection) { hit.intersection = x2; }
+    if(hit.intersection == infinity) { return Hit(); }
 
     hit.normal = normalize(ray.getPoint(hit.intersection) - center);
 
