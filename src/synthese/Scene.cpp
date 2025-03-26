@@ -12,16 +12,19 @@
 #include "mesh_io.h"
 #include "utility.hpp"
 
-Scene::Scene() : globalRow(0), lightSky(0.671f, 0.851f, 1.0f), darkSky(0.239f, 0.29f, 0.761f) { }
+Scene::Scene(const std::string& name)
+    : globalRow(0), lightSky(0.671f, 0.851f, 1.0f), darkSky(0.239f, 0.29f, 0.761f), name(name) { }
 
 Scene::~Scene() {
     for(const Object* object : objects) { delete object; }
     for(const Light* light : lights) { delete light; }
 }
 
-void Scene::render(const std::string& path, unsigned int width, unsigned int height) {
+void Scene::render(unsigned int width, unsigned int height) {
     if(objects.empty()) { throw std::runtime_error("Cannot render an empty scene."); }
     if(width == 0 || height == 0) { throw std::runtime_error("Cannot render to an empty image."); }
+
+    std::cout << "Rendering scene \"" << name << "\" to a " << width << " by " << height << " image.\n";
 
     Image image(width, height);
     std::vector<std::thread> threads;
@@ -30,7 +33,7 @@ void Scene::render(const std::string& path, unsigned int width, unsigned int hei
     unsigned int threadCount = std::thread::hardware_concurrency();
     globalRow = 0;
 
-    std::cout << "Dispatching " << threadCount << " threads...\n";
+    std::cout << "\tDispatching " << threadCount << " threads...\n";
     for(unsigned int i = 0 ; i < threadCount ; ++i) {
         threads.emplace_back(&Scene::computeImage, this, std::ref(image));
     }
@@ -42,7 +45,7 @@ void Scene::render(const std::string& path, unsigned int width, unsigned int hei
     std::chrono::duration<float> duration = std::chrono::high_resolution_clock::now() - startTime;
     std::cout << "The image took " << duration.count() << "s to compute.\n\n";
 
-    write_image(image, path.c_str());
+    write_image(image, ("data/synthese/" + name + ".png").c_str());
 }
 
 void Scene::add(const Light* light) {

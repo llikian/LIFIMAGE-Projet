@@ -21,10 +21,10 @@
  */
 class Scene {
 public:
-    Scene();
+    Scene(const std::string& name);
     ~Scene();
 
-    void render(const std::string& path, unsigned int width, unsigned int height);
+    void render(unsigned int width, unsigned int height);
 
     void add(const Light* light);
     void add(const Object* object);
@@ -49,4 +49,6 @@ private:
 
     Color lightSky;
     Color darkSky;
+
+    std::string name;
 };

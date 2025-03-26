@@ -74,7 +74,7 @@ Hit Sphere::intersect(const Ray& ray) const {
 
     // float a = dot(ray.direction, ray.direction); // ray.direction is normalized so this always equals 1
     float b = 2.0f * dot(ray.direction, co);
-    float c = dot(co, co) - radius * radius;
+    float c = length2(co) - radius * radius;
 
     float delta = std::sqrt(b * b - 4.0f * c);
 

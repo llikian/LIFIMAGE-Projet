@@ -47,3 +47,5 @@ inline float degrees(float rad) {
 }
 
 bool operator!=(const Vector& vec, const Vector& other);
+
+Color hueToRGBA(unsigned short hue);
