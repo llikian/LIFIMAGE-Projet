@@ -32,12 +32,12 @@ PointLight::PointLight(const Color& color, const Point& position, float radius)
 
 Color PointLight::calculate(const Hit& hit, const Point& point, const std::vector<const Object*>& objects) const {
     Ray ray(point, position - point);
-    float distance = length(ray.direction);
-    ray.direction = ray.direction / distance;
+    float distance2 = length(ray.direction);
+    ray.direction = ray.direction / std::sqrt(distance2);
 
     if(isInShadow(hit.object, ray, objects)) { return Black(); }
 
-    float attenuation = std::max(radius * radius / (distance * distance), 0.0f);
+    float attenuation = std::clamp(radius * radius / (1.0f + distance2), 0.0f, 1.0f);
     float cos_theta = std::max(dot(hit.normal, ray.direction), 0.0f);
 
     return color * attenuation * cos_theta;
