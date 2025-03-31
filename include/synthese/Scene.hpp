@@ -11,6 +11,7 @@
 #include "image.h"
 #include "Light.hpp"
 #include "mat4.hpp"
+#include "mesh_io.h"
 #include "Object.hpp"
 #include "Ray.hpp"
 #include "vec.h"
@@ -21,7 +22,7 @@
  */
 class Scene {
 public:
-    Scene(const std::string& name);
+    explicit Scene(const std::string& name);
     ~Scene();
 
     void render(unsigned int width, unsigned int height);

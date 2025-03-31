@@ -9,8 +9,6 @@
 #include <vector>
 #include "color.h"
 #include "Hit.hpp"
-#include "mat4.hpp"
-#include "mesh_io.h"
 #include "Ray.hpp"
 #include "vec.h"
 #include "Vertex.hpp"

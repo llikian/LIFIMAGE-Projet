@@ -145,8 +145,7 @@ Scene scene6() {
     MeshIOData suzanne;
     read_meshio_data("data/synthese/suzanne.obj", suzanne);
     scene.add(suzanne, translate(-1.0f, 0.2f, -2.0f).rotateY(-10.0f), Color(0.678f, 0.424f, 0.902f), true);
-    scene.add(suzanne, translate(1.0f, -0.2f, -2.0f).rotateY(10.0f).rotateZ(180.0f), Color(0.322f, 0.576f, 0.098f),
-              false);
+    scene.add(suzanne, translate(1.0f, -0.2f, -2.0f).rotateY(10.0f).rotateZ(180.0f), Color(0.322f, 0.576f, 0.098f), false);
 
     return scene;
 }
@@ -187,11 +186,11 @@ Scene scene7() {
 
 int main() {
     try {
-        // scene1().render(1024, 512);
-        // scene2().render(1024, 512);
-        // scene3().render(1024, 512);
-        // scene4().render(1024, 512);
-        // scene5().render(1024, 512);
+        scene1().render(1024, 512);
+        scene2().render(1024, 512);
+        scene3().render(1024, 512);
+        scene4().render(1024, 512);
+        scene5().render(1024, 512);
         // scene6().render(768, 512);
         scene7().render(512, 512);
     } catch(const std::exception& exception) {
