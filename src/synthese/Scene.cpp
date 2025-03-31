@@ -12,16 +12,19 @@
 #include "mesh_io.h"
 #include "utility.hpp"
 
-Scene::Scene() : globalRow(0) { }
+Scene::Scene(const std::string& name)
+    : globalRow(0), lightSky(0.671f, 0.851f, 1.0f), darkSky(0.239f, 0.29f, 0.761f), name(name) { }
 
 Scene::~Scene() {
     for(const Object* object : objects) { delete object; }
     for(const Light* light : lights) { delete light; }
 }
 
-void Scene::render(const std::string& path, unsigned int width, unsigned int height) {
+void Scene::render(unsigned int width, unsigned int height) {
     if(objects.empty()) { throw std::runtime_error("Cannot render an empty scene."); }
     if(width == 0 || height == 0) { throw std::runtime_error("Cannot render to an empty image."); }
+
+    std::cout << "Rendering scene \"" << name << "\" to a " << width << " by " << height << " image.\n";
 
     Image image(width, height);
     std::vector<std::thread> threads;
@@ -30,7 +33,7 @@ void Scene::render(const std::string& path, unsigned int width, unsigned int hei
     unsigned int threadCount = std::thread::hardware_concurrency();
     globalRow = 0;
 
-    std::cout << "Dispatching " << threadCount << " threads...\n";
+    std::cout << "\tDispatching " << threadCount << " threads...\n";
     for(unsigned int i = 0 ; i < threadCount ; ++i) {
         threads.emplace_back(&Scene::computeImage, this, std::ref(image));
     }
@@ -40,9 +43,9 @@ void Scene::render(const std::string& path, unsigned int width, unsigned int hei
     }
 
     std::chrono::duration<float> duration = std::chrono::high_resolution_clock::now() - startTime;
-    std::cout << "The image took " << duration.count() << "s to compute.\n";
+    std::cout << "The image took " << duration.count() << "s to compute.\n\n";
 
-    write_image(image, path.c_str());
+    write_image(image, ("data/synthese/" + name + ".png").c_str());
 }
 
 void Scene::add(const Light* light) {
@@ -53,25 +56,67 @@ void Scene::add(const Object* object) {
     objects.push_back(object);
 }
 
-void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color) {
-    std::vector<Point> positions;
-    read_positions(meshPath.c_str(), positions);
+void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color, bool smooth) {
+    MeshIOData data;
+    read_meshio_data(meshPath.c_str(), data);
+    add(data, transform, color, smooth);
+}
 
-    for(unsigned int i = 0 ; i < positions.size() / 3 ; i++) {
-        add(new Triangle(color,
-                         transform * positions[3 * i],
-                         transform * positions[3 * i + 1],
-                         transform * positions[3 * i + 2]));
+void Scene::add(const MeshIOData& data, const mat4& transform, const Color& color, bool smooth) {
+    for(unsigned int i = 0 ; i + 2 < data.indices.size() ; i += 3) {
+        unsigned int index0 = data.indices.at(i);
+        unsigned int index1 = data.indices.at(i + 1);
+        unsigned int index2 = data.indices.at(i + 2);
+
+        if(smooth) {
+            add(new MeshTriangle(color,
+                                 Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
+                                 Vertex(transform * data.positions.at(index1), data.normals.at(index1)),
+                                 Vertex(transform * data.positions.at(index2), data.normals.at(index2))));
+        } else {
+            add(new Triangle(color,
+                             transform * data.positions.at(index0),
+                             transform * data.positions.at(index1),
+                             transform * data.positions.at(index2)));
+        }
     }
 }
 
-void Scene::add(const std::vector<Point>& meshData, const mat4& transform, const Color& color) {
-    for(unsigned int i = 0 ; i < meshData.size() / 3 ; i++) {
+void Scene::add(const std::vector<Point>& positions, const mat4& transform, const Color& color) {
+    for(unsigned int i = 0 ; i + 2 < positions.size() ; i += 3) {
         add(new Triangle(color,
-                         transform * meshData[3 * i],
-                         transform * meshData[3 * i + 1],
-                         transform * meshData[3 * i + 2]));
+                         transform * positions[i],
+                         transform * positions[i + 1],
+                         transform * positions[i + 2]));
     }
+}
+
+Hit Scene::getClosestHit(const Ray& ray) const {
+    Hit closest;
+
+    for(const Object* object : objects) {
+        Hit hit = object->intersect(ray);
+
+        if(hit.intersection != infinity && (closest.object == nullptr || hit.intersection < closest.intersection)) {
+            closest.intersection = hit.intersection;
+            closest.normal = hit.normal;
+            closest.object = object;
+        }
+    }
+
+    return closest;
+}
+
+void Scene::setLightSkyColor(float r, float g, float b) {
+    lightSky.r = r;
+    lightSky.g = g;
+    lightSky.b = b;
+}
+
+void Scene::setDarkSkyColor(float r, float g, float b) {
+    darkSky.r = r;
+    darkSky.g = g;
+    darkSky.b = b;
 }
 
 void Scene::computeImage(Image& image) {
@@ -119,48 +164,15 @@ Color Scene::computePixel(Point extremity) const {
 
     const Ray ray(camera, normalize(Vector(camera, extremity)));
 
-    Hit hit = getClosestHit(ray);
-    if(hit.object == nullptr) {
-        static const Color darkSky(0.239f, 0.29f, 0.761f);
-        static const Color lightSky(0.671f, 0.851f, 1.0f);
+    Hit closest = getClosestHit(ray);
+    if(closest.object == nullptr) { return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f); }
 
-        return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f);
-    }
+    Point point = ray.getPoint(closest.intersection);
+    Point epsilonPoint = ray.getEpsilonPoint(closest);
+    Color color = closest.object->getColor(point);
 
-    Point point = ray.getPoint(hit.intersection);
-    Point epsilonPoint = ray.getEpsilonPoint(hit);
-    Color color = static_cast<const Object*>(hit.object)->getColor(point);
-
-    Ray lightRay(epsilonPoint, Vector());
     Color lightColor;
-
-    for(const Light* light : lights) {
-        // Lighting: Needs to be before getClosestHit because it defines lightRay.direction
-        Color lighting = light->calculate(hit, lightRay);
-
-        Hit closest = getClosestHit(lightRay);
-        if(closest.object == nullptr || closest.object == hit.object) {
-            lightColor += lighting;
-        }
-    }
+    for(const Light* light : lights) { lightColor += light->calculate(closest, epsilonPoint, objects); }
 
     return color * lightColor;
-}
-
-Hit Scene::getClosestHit(const Ray& ray) const {
-    Hit closest;
-
-    for(const Object* object : objects) {
-        Hit hit = object->intersect(ray);
-
-        if(hit.intersection != infinity) {
-            if(closest.object == nullptr || hit.intersection < closest.intersection) {
-                closest.intersection = hit.intersection;
-                closest.normal = hit.normal;
-                closest.object = object;
-            }
-        }
-    }
-
-    return closest;
 }

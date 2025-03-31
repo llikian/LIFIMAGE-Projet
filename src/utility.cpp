@@ -82,3 +82,17 @@ float length(const vec4& vec) {
 bool operator!=(const Vector& vec, const Vector& other) {
     return vec.x != other.x || vec.y != other.y || vec.z != other.z;
 }
+
+Color hueToRGBA(unsigned short hue) {
+    float x = 1.0f - fabsf(fmodf(static_cast<float>(hue) / 60.0f, 2.0f) - 1.0f);
+
+    switch((hue / 60) % 6) {
+        case 0: return Color(1.0f, x, 0.0f);
+        case 1: return Color(x, 1.0f, 0.0f);
+        case 2: return Color(0.0f, 1.0f, x);
+        case 3: return Color(0.0f, x, 1.0f);
+        case 4: return Color(x, 0.0f, 1.0f);
+        case 5: return Color(1.0f, 0.0f, x);
+        default: return Color();
+    }
+}

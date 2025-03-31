@@ -21,24 +21,34 @@
  */
 class Scene {
 public:
-    Scene();
+    Scene(const std::string& name);
     ~Scene();
 
-    void render(const std::string& path, unsigned int width, unsigned int height);
+    void render(unsigned int width, unsigned int height);
 
     void add(const Light* light);
     void add(const Object* object);
-    void add(const std::string& meshPath, const mat4& transform, const Color& color = White());
-    void add(const std::vector<Point>& meshData, const mat4& transform, const Color& color = White());
+    void add(const std::string& meshPath, const mat4& transform, const Color& color = White(), bool smooth = false);
+    void add(const MeshIOData& data, const mat4& transform, const Color& color = White(), bool smooth = false);
+    void add(const std::vector<Point>& positions, const mat4& transform, const Color& color = White());
+
+    Hit getClosestHit(const Ray& ray) const;
+
+    void setLightSkyColor(float r, float g, float b);
+    void setDarkSkyColor(float r, float g, float b);
 
 private:
     void computeImage(Image& image);
     Color computePixel(Point extremity) const;
-    Hit getClosestHit(const Ray& ray) const;
+
+    unsigned int globalRow;
 
     Point camera;
     std::vector<const Light*> lights;
     std::vector<const Object*> objects;
 
-    unsigned int globalRow;
+    Color lightSky;
+    Color darkSky;
+
+    std::string name;
 };

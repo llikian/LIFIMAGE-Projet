@@ -8,6 +8,8 @@
 #include <limits>
 #include "vec.h"
 
+struct Object; // Forward declare Object to avoid circular dependency
+
 static constexpr float infinity = std::numeric_limits<float>::infinity();
 
 /**
@@ -20,5 +22,5 @@ struct Hit {
 
     float intersection;
     Vector normal;
-    const void* object;
+    const Object* object;
 };
