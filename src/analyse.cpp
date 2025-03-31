@@ -91,7 +91,7 @@ int main() {
     auto checkOffset = [&width, &height, &labels, &neighborLabels, &neighbors](unsigned int x, unsigned int y) {
         if(x >= width || y >= height) { return; }
 
-        unsigned int value = labels(x, y);
+        const unsigned int value = labels(x, y);
         if(value > 0) {
             neighborLabels[neighbors++] = value;
         }
@@ -196,7 +196,7 @@ int main() {
                     if(i == 0 && j == 0) continue;
                     neighbour = { current.x + i, current.y + j };
 
-                    if(neighbour.x >= 0 && neighbour.y >= 0 && neighbour.x < width && neighbour.y < height
+                    if(neighbour.x < width && neighbour.y < height
                        && !binaryMask(neighbour.x, neighbour.y)
                        && !outline(neighbour.x, neighbour.y)
                        && 9 - applyStructuringElement(binaryMask, neighbour.x, neighbour.y, MathematicalMorphology::Square) >= 1) {
@@ -212,6 +212,10 @@ int main() {
         } while(current.x != first.x || current.y != first.y);
     }
     write_boolean_array_as_grayscale_image("data/analyse/outline.png", outline);
+
+    /* ---- Convex Hull of pieces ---- */
+
+
 
     /* ---- Extract Pieces ---- */
     std::filesystem::create_directory("data/analyse/pieces");
