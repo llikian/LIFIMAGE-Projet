@@ -11,7 +11,7 @@
 #include "mesh_io.h"
 #include "utility.hpp"
 
-Scene scene1() {
+void scene1(unsigned int width, unsigned int height) {
     Scene scene("scene1");
 
     /* ---- Lights ---- */
@@ -29,10 +29,10 @@ Scene scene1() {
         }, center, 1.0f));
     }
 
-    return scene;
+    scene.render(width, height);
 }
 
-Scene scene2() {
+void scene2(unsigned int width, unsigned int height) {
     Scene scene("scene2");
 
     /* ---- Lights ---- */
@@ -50,10 +50,10 @@ Scene scene2() {
     scene.add(new Sphere(Color(0.82f, 0.2f, 0.2f), Point(-1.0f, 1.0f, -3.0f), 1.0f));
     scene.add(new Sphere(Color(0.2f, 0.2f, 0.82f), Point(1.0f, 1.0f, -3.0f), 1.0f));
 
-    return scene;
+    scene.render(width, height);
 }
 
-Scene scene3() {
+void scene3(unsigned int width, unsigned int height) {
     Scene scene("scene3");
 
     /* ---- Lights ---- */
@@ -71,10 +71,10 @@ Scene scene3() {
         scene.add(positions, translate(0.0f, 2.0f, -3.0f), Green());
     }
 
-    return scene;
+    scene.render(width, height);
 }
 
-Scene scene4() {
+void scene4(unsigned int width, unsigned int height) {
     Scene scene("scene4");
 
     /* ---- Lights ---- */
@@ -113,10 +113,10 @@ Scene scene4() {
         }, pos, 1.0f));
     }
 
-    return scene;
+    scene.render(width, height);
 }
 
-Scene scene5() {
+void scene5(unsigned int width, unsigned int height) {
     Scene scene("scene5");
 
     /* ---- Lights ---- */
@@ -127,10 +127,10 @@ Scene scene5() {
     scene.add("data/synthese/dodecahedron.obj", translate(-2.0f, 0.0f, -4.0f).scale(2.0f), White());
     scene.add("data/synthese/cube.obj", translate(2.0f, 0.0f, -4.0f).scale(0.5f), Red());
 
-    return scene;
+    scene.render(width, height);
 }
 
-Scene scene6() {
+void scene6(unsigned int width, unsigned int height) {
     Scene scene("scene6");
 
     /* ---- Sky ---- */
@@ -145,12 +145,13 @@ Scene scene6() {
     MeshIOData suzanne;
     read_meshio_data("data/synthese/suzanne.obj", suzanne);
     scene.add(suzanne, translate(-1.0f, 0.2f, -2.0f).rotateY(-10.0f), Color(0.678f, 0.424f, 0.902f), true);
-    scene.add(suzanne, translate(1.0f, -0.2f, -2.0f).rotateY(10.0f).rotateZ(180.0f), Color(0.322f, 0.576f, 0.098f), false);
+    scene.add(suzanne, translate(1.0f, -0.2f, -2.0f).rotateY(10.0f).rotateZ(180.0f), Color(0.322f, 0.576f, 0.098f),
+              false);
 
-    return scene;
+    scene.render(width, height);
 }
 
-Scene scene7() {
+void scene7(unsigned int width, unsigned int height) {
     Scene scene("scene7");
 
     /* ---- Lights ---- */
@@ -173,7 +174,6 @@ Scene scene7() {
                 scene.add(new Sphere(hueToRGBA(((i + j) % spheres) * hue),
                                      Point(circleRadius * std::cos(i * angle), circleRadius * std::sin(i * angle), z),
                                      radius));
-
             }
 
             radius *= 0.9f;
@@ -181,18 +181,18 @@ Scene scene7() {
         }
     }
 
-    return scene;
+    scene.render(width, height);
 }
 
 int main() {
     try {
-        scene1().render(1024, 512);
-        scene2().render(1024, 512);
-        scene3().render(1024, 512);
-        scene4().render(1024, 512);
-        scene5().render(1024, 512);
-        // scene6().render(768, 512);
-        scene7().render(512, 512);
+        scene1(1024, 512);
+        scene2(1024, 512);
+        scene3(1024, 512);
+        scene4(1024, 512);
+        scene5(1024, 512);
+        scene6(768, 512);
+        scene7(512, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

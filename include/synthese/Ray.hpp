@@ -20,5 +20,5 @@ struct Ray {
     Vector direction;
 
     Point getPoint(float t) const;
-    Point getEpsilonPoint(const Hit& hit, float epsilon = 10e-5) const;
+    Point getEpsilonPoint(const Hit& hit, float epsilon = 10e-3) const;
 };
