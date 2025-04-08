@@ -5,9 +5,7 @@
 
 #pragma once
 
-#include <vector>
 #include "color.h"
-#include "Object.hpp"
 #include "Ray.hpp"
 #include "vec.h"
 

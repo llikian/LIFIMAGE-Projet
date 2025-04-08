@@ -208,10 +208,10 @@ void scene9(unsigned int width, unsigned int height) {
     scene.setDarkSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-2.0f, 2.0f, 1.0f)));
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(0.0f, -1.0f, 1.0f)));
 
     /* ---- Objects ---- */
-    scene.add("data/synthese/sponza.obj", translate(0.0f, 0.2f, -4.0f).scale(0.05), White(), false);
+    scene.add("data/synthese/sponza.obj", translate(0.0f, 0.0f, -3.0f).scale(0.05).rotateY(90.0f), White(), false);
 
     scene.render(width, height);
 }
@@ -225,8 +225,8 @@ int main() {
         // scene5(1024, 512);
         // scene6(768, 512);
         // scene7(512, 512);
-        scene8(1024, 1024);
-        // scene9(512, 512);
+        // scene8(1024, 1024);
+        scene9(512, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

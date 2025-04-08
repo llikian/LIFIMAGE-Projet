@@ -8,8 +8,6 @@
 #include <cmath>
 #include "synthese/Scene.hpp"
 
-#include "synthese/BVH.hpp"
-
 Light::Light(const Color& color) : color(color) { }
 
 bool Light::isInShadow(const Object* object, const Ray& ray, const Scene* scene) {
