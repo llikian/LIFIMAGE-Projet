@@ -184,15 +184,49 @@ void scene7(unsigned int width, unsigned int height) {
     scene.render(width, height);
 }
 
+void scene8(unsigned int width, unsigned int height) {
+    Scene scene("scene8");
+
+    /* ---- Sky ---- */
+    scene.setLightSkyColor(0.3f, 0.3f, 0.3f);
+    scene.setDarkSkyColor(0.1f, 0.1f, 0.1f);
+
+    /* ---- Lights ---- */
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-2.0f, 2.0f, 1.0f)));
+
+    /* ---- Objects ---- */
+    scene.add("data/synthese/dragon80k.obj", translate(0.0f, 0.2f, -4.0f).scale(6.0f).rotateY(90.0f), Red(), false);
+
+    scene.render(width, height);
+}
+
+void scene9(unsigned int width, unsigned int height) {
+    Scene scene("scene9");
+
+    /* ---- Sky ---- */
+    scene.setLightSkyColor(0.3f, 0.3f, 0.3f);
+    scene.setDarkSkyColor(0.1f, 0.1f, 0.1f);
+
+    /* ---- Lights ---- */
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-2.0f, 2.0f, 1.0f)));
+
+    /* ---- Objects ---- */
+    scene.add("data/synthese/sponza.obj", translate(0.0f, 0.2f, -4.0f).scale(0.05), White(), false);
+
+    scene.render(width, height);
+}
+
 int main() {
     try {
-        scene1(1024, 512);
-        scene2(1024, 512);
-        scene3(1024, 512);
-        scene4(1024, 512);
-        scene5(1024, 512);
-        scene6(768, 512);
-        scene7(512, 512);
+        // scene1(1024, 512);
+        // scene2(1024, 512);
+        // scene3(1024, 512);
+        // scene4(1024, 512);
+        // scene5(1024, 512);
+        // scene6(768, 512);
+        // scene7(512, 512);
+        scene8(1024, 1024);
+        // scene9(512, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

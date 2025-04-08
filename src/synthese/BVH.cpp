@@ -91,10 +91,6 @@ Hit BVH::intersect(const Ray& ray) const {
     return intersect(ray, rootIndex);
 }
 
-const Object* BVH::getClosestObject(const Ray& ray) const {
-    return getClosestObject(ray, rootIndex);
-}
-
 Hit BVH::intersect(const Ray& ray, uint nodeIndex) const {
     Node& node = nodes[nodeIndex];
     if(!node.intersect(ray)) { return Hit(); }
@@ -119,33 +115,5 @@ Hit BVH::intersect(const Ray& ray, uint nodeIndex) const {
         Hit hit2 = intersect(ray, node.left + 1);
 
         return hit1.intersection < hit2.intersection ? hit1 : hit2;
-    }
-}
-
-const Object* BVH::getClosestObject(const Ray& ray, uint nodeIndex) const {
-    Node& node = nodes[nodeIndex];
-    if(!node.intersect(ray)) { return nullptr; }
-
-    if(node.isLeaf()) {
-        Hit closest;
-
-        for(uint i = 0 ; i < node.primitiveCount ; i++) {
-            const Object* object = objects.at(objectIndices.at(node.firstPrimitiveIndex + i));
-
-            Hit hit = object->intersect(ray);
-
-            if(hit.intersection != infinity && (closest.object == nullptr || hit.intersection < closest.intersection)) {
-                closest.intersection = hit.intersection;
-                closest.normal = hit.normal;
-                closest.object = object;
-            }
-        }
-
-        return closest.object;
-    } else {
-        Hit hit1 = intersect(ray, node.left);
-        Hit hit2 = intersect(ray, node.left + 1);
-
-        return hit1.intersection < hit2.intersection ? hit1.object : hit2.object;
     }
 }
