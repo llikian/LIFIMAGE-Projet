@@ -11,12 +11,14 @@
 #include "Ray.hpp"
 #include "vec.h"
 
+class Scene;
+
 struct Light {
     explicit Light(const Color& color);
     virtual ~Light() = default;
 
-    virtual Color calculate(const Hit& hit, const Point& point, const std::vector<const Object*>& objects) const = 0;
-    static bool isInShadow(const Object* object, const Ray& ray, const std::vector<const Object*>& objects);
+    virtual Color calculate(const Hit& hit, const Point& point, const Scene* scene) const = 0;
+    static bool isInShadow(const Object* object, const Ray& ray, const Scene* scene);
 
     Color color;
 };
@@ -24,7 +26,7 @@ struct Light {
 struct DirectionalLight : Light {
     DirectionalLight(const Color& color, const Vector& direction);
 
-    Color calculate(const Hit& hit, const Point& point, const std::vector<const Object*>& objects) const override;
+    Color calculate(const Hit& hit, const Point& point, const Scene* scene) const override;
 
     Vector direction;
 };
@@ -32,7 +34,7 @@ struct DirectionalLight : Light {
 struct PointLight : Light {
     PointLight(const Color& color, const Point& position, float radius);
 
-    Color calculate(const Hit& hit, const Point& point, const std::vector<const Object*>& objects) const override;
+    Color calculate(const Hit& hit, const Point& point, const Scene* scene) const override;
 
     Point position;
     float radius;

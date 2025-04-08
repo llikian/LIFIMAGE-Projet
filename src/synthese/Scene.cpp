@@ -61,6 +61,10 @@ void Scene::add(const Object* object) {
     objects.push_back(object);
 }
 
+void Scene::add(const Plane* plane) {
+    planes.push_back(plane);
+}
+
 void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color, bool smooth) {
     MeshIOData data;
     read_meshio_data(meshPath.c_str(), data);
@@ -97,15 +101,15 @@ void Scene::add(const std::vector<Point>& positions, const mat4& transform, cons
 }
 
 Hit Scene::getClosestHit(const Ray& ray) const {
-    Hit closest;
+    Hit closest = bvh.intersect(ray);
 
-    for(const Object* object : objects) {
-        Hit hit = object->intersect(ray);
+    for(const Plane* plane : planes) {
+        Hit hit = plane->intersect(ray);
 
         if(hit.intersection != infinity && (closest.object == nullptr || hit.intersection < closest.intersection)) {
             closest.intersection = hit.intersection;
             closest.normal = hit.normal;
-            closest.object = object;
+            closest.object = plane;
         }
     }
 
@@ -169,8 +173,7 @@ Color Scene::computePixel(Point extremity) const {
 
     const Ray ray(camera, normalize(Vector(camera, extremity)));
 
-    // Hit closest = getClosestHit(ray);
-    Hit closest = bvh.intersect(ray);
+    Hit closest = getClosestHit(ray);
     if(closest.object == nullptr) { return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f); }
 
     Point point = ray.getPoint(closest.intersection);
@@ -178,7 +181,7 @@ Color Scene::computePixel(Point extremity) const {
     Color color = closest.object->getColor(point);
 
     Color lightColor;
-    for(const Light* light : lights) { lightColor += light->calculate(closest, epsilonPoint, objects); }
+    for(const Light* light : lights) { lightColor += light->calculate(closest, epsilonPoint, this); }
 
     return color * lightColor;
 }

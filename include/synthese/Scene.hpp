@@ -31,6 +31,7 @@ public:
 
     void add(const Light* light);
     void add(const Object* object);
+    void add(const Plane* plane);
     void add(const std::string& meshPath, const mat4& transform, const Color& color = White(), bool smooth = false);
     void add(const MeshIOData& data, const mat4& transform, const Color& color = White(), bool smooth = false);
     void add(const std::vector<Point>& positions, const mat4& transform, const Color& color = White());
@@ -51,6 +52,7 @@ private:
     Point camera;
     std::vector<const Light*> lights;
     std::vector<const Object*> objects;
+    std::vector<const Plane*> planes;
 
     BVH bvh;
 

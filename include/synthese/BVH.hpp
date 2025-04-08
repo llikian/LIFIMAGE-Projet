@@ -36,9 +36,11 @@ public:
     void subdivide(uint nodeIndex);
 
     Hit intersect(const Ray& ray) const;
+    const Object* getClosestObject(const Ray& ray) const;
 
 private:
     Hit intersect(const Ray& ray, uint nodeIndex) const;
+    const Object* getClosestObject(const Ray& ray, uint nodeIndex) const;
 
     const std::vector<const Object*>& objects;
     std::vector<uint> objectIndices;

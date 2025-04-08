@@ -186,13 +186,13 @@ void scene7(unsigned int width, unsigned int height) {
 
 int main() {
     try {
-        // scene1(1024, 512);
-        // scene2(1024, 512);
-        // scene3(1024, 512);
-        // scene4(1024, 512);
-        // scene5(1024, 512);
+        scene1(1024, 512);
+        scene2(1024, 512);
+        scene3(1024, 512);
+        scene4(1024, 512);
+        scene5(1024, 512);
         scene6(768, 512);
-        // scene7(512, 512);
+        scene7(512, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

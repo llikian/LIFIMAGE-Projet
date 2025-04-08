@@ -33,7 +33,6 @@ struct Object {
 };
 
 Hit getClosestHit(const Ray& ray, const std::vector<const Object*>& objects);
-const Object* getClosestObject(const Ray& ray, const std::vector<const Object*>& objects);
 
 struct Plane : Object {
     Plane(const Color& color, const Point& point, const Vector& normal);

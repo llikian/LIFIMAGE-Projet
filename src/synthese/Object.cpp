@@ -28,22 +28,6 @@ Hit getClosestHit(const Ray& ray, const std::vector<const Object*>& objects) {
     return closest;
 }
 
-const Object* getClosestObject(const Ray& ray, const std::vector<const Object*>& objects) {
-    float intersection = infinity;
-    const Object* obj = nullptr;
-
-    for(const Object* object : objects) {
-        Hit hit = object->intersect(ray);
-
-        if(hit.intersection != infinity && (obj == nullptr || hit.intersection < intersection)) {
-            intersection = hit.intersection;
-            obj = object;
-        }
-    }
-
-    return obj;
-}
-
 Plane::Plane(const Color& color, const Point& point, const Vector& normal)
     : Object(color), point(point), normal(normalize(normal)) { }
 
@@ -60,13 +44,9 @@ Hit Plane::intersect(const Ray& ray) const {
     return hit;
 }
 
-Point Plane::getCentroid() const {
-    return point; // TODO: Fix this
-}
+Point Plane::getCentroid() const { return point; }
 
-void Plane::compareBoundingBox(Point& pmin, Point& pmax) const {
-    // TODO: Fix this
-}
+void Plane::compareBoundingBox(Point& pmin, Point& pmax) const { }
 
 Sphere::Sphere(const Color& color, const Point& center, float radius)
     : Object(color), center(center), radius(radius) { }
@@ -105,8 +85,8 @@ Point Sphere::getCentroid() const {
 
 void Sphere::compareBoundingBox(Point& pmin, Point& pmax) const {
     Vector r(radius, radius, radius);
-    pmin = min3(pmin, center - r); // TODO: Check if this works
-    pmax = max3(pmax, center + r); // TODO: Check if this works
+    pmin = min3(pmin, center - r);
+    pmax = max3(pmax, center + r);
 }
 
 Triangle::Triangle(const Color& color, const Point& A, const Point& B, const Point& C)
