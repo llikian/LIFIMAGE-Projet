@@ -26,6 +26,9 @@ struct Object {
 
     virtual Hit intersect(const Ray& ray) const = 0;
 
+    virtual Point getCentroid() const = 0;
+    virtual void compareBoundingBox(Point& pmin, Point& pmax) const = 0;
+
     ColorFunc getColor;
 };
 
@@ -38,6 +41,9 @@ struct Plane : Object {
 
     Hit intersect(const Ray& ray) const override;
 
+    Point getCentroid() const override;
+    void compareBoundingBox(Point& pmin, Point& pmax) const override;
+
     Point point;
     Vector normal;
 };
@@ -47,6 +53,9 @@ struct Sphere : Object {
     Sphere(const ColorFunc& getColor, const Point& center, float radius);
 
     Hit intersect(const Ray& ray) const override;
+
+    Point getCentroid() const override;
+    void compareBoundingBox(Point& pmin, Point& pmax) const override;
 
     Point center;
     float radius;
@@ -58,6 +67,9 @@ struct Triangle : Object {
 
     Hit intersect(const Ray& ray) const override;
 
+    Point getCentroid() const override;
+    void compareBoundingBox(Point& pmin, Point& pmax) const override;
+
     Point A;
     Point B;
     Point C;
@@ -68,6 +80,9 @@ struct MeshTriangle : Object {
     MeshTriangle(const ColorFunc& getColor, const Vertex& A, const Vertex& B, const Vertex& C);
 
     Hit intersect(const Ray& ray) const override;
+
+    Point getCentroid() const override;
+    void compareBoundingBox(Point& pmin, Point& pmax) const override;
 
     Vertex A;
     Vertex B;

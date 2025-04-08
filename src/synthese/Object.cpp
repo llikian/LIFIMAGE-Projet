@@ -6,12 +6,11 @@
 #include "synthese/Object.hpp"
 
 #include <cmath>
+#include "utility.hpp"
 
-Object::Object(const Color& color)
-    : getColor([color](const Point&) { return color; }) { }
+Object::Object(const Color& color) : getColor([color](const Point&) { return color; }) { }
 
-Object::Object(const ColorFunc& getColor)
-    : getColor(getColor) { }
+Object::Object(const ColorFunc& getColor) : getColor(getColor) { }
 
 Hit getClosestHit(const Ray& ray, const std::vector<const Object*>& objects) {
     Hit closest;
@@ -61,6 +60,14 @@ Hit Plane::intersect(const Ray& ray) const {
     return hit;
 }
 
+Point Plane::getCentroid() const {
+    return point; // TODO: Fix this
+}
+
+void Plane::compareBoundingBox(Point& pmin, Point& pmax) const {
+    // TODO: Fix this
+}
+
 Sphere::Sphere(const Color& color, const Point& center, float radius)
     : Object(color), center(center), radius(radius) { }
 
@@ -92,6 +99,16 @@ Hit Sphere::intersect(const Ray& ray) const {
     return hit;
 }
 
+Point Sphere::getCentroid() const {
+    return center;
+}
+
+void Sphere::compareBoundingBox(Point& pmin, Point& pmax) const {
+    Vector r(radius, radius, radius);
+    pmin = min3(pmin, center - r); // TODO: Check if this works
+    pmax = max3(pmax, center + r); // TODO: Check if this works
+}
+
 Triangle::Triangle(const Color& color, const Point& A, const Point& B, const Point& C)
     : Object(color), A(A), B(B), C(C) { }
 
@@ -112,6 +129,19 @@ Hit Triangle::intersect(const Ray& ray) const {
     if(dot(hit.normal, cross(A - C, point - C)) < 0.0f) { return Hit(); }
 
     return hit;
+}
+
+Point Triangle::getCentroid() const {
+    return (A + B + C) / 3.0f;
+}
+
+void Triangle::compareBoundingBox(Point& pmin, Point& pmax) const {
+    pmin = min3(pmin, A);
+    pmin = min3(pmin, B);
+    pmin = min3(pmin, C);
+    pmax = max3(pmax, A);
+    pmax = max3(pmax, B);
+    pmax = max3(pmax, C);
 }
 
 MeshTriangle::MeshTriangle(const Color& color, const Vertex& A, const Vertex& B, const Vertex& C)
@@ -147,4 +177,17 @@ Hit MeshTriangle::intersect(const Ray& ray) const {
     hit.normal = normalize(u * A.normal + v * B.normal + w * C.normal);
 
     return hit;
+}
+
+Point MeshTriangle::getCentroid() const {
+    return (A.position + B.position + C.position) / 3.0f;
+}
+
+void MeshTriangle::compareBoundingBox(Point& pmin, Point& pmax) const {
+    pmin = min3(pmin, A.position);
+    pmin = min3(pmin, B.position);
+    pmin = min3(pmin, C.position);
+    pmax = max3(pmax, A.position);
+    pmax = max3(pmax, B.position);
+    pmax = max3(pmax, C.position);
 }

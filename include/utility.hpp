@@ -49,3 +49,15 @@ inline float degrees(float rad) {
 bool operator!=(const Vector& vec, const Vector& other);
 
 Color hueToRGBA(unsigned short hue);
+
+inline Point min3(const Point& point, const Point& other) {
+    return Point(std::min(point.x, other.x),
+                 std::min(point.y, other.y),
+                 std::min(point.z, other.z));
+}
+
+inline Point max3(const Point& point, const Point& other) {
+    return Point(std::max(point.x, other.x),
+                 std::max(point.y, other.y),
+                 std::max(point.z, other.z));
+}

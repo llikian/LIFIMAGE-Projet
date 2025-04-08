@@ -7,6 +7,8 @@
 
 #include <string>
 #include <vector>
+
+#include "BVH.hpp"
 #include "Hit.hpp"
 #include "image.h"
 #include "Light.hpp"
@@ -42,14 +44,16 @@ private:
     void computeImage(Image& image);
     Color computePixel(Point extremity) const;
 
+    std::string name;
+
     unsigned int globalRow;
 
     Point camera;
     std::vector<const Light*> lights;
     std::vector<const Object*> objects;
 
+    BVH bvh;
+
     Color lightSky;
     Color darkSky;
-
-    std::string name;
 };

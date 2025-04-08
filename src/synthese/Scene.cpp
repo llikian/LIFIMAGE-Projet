@@ -13,7 +13,10 @@
 #include "utility.hpp"
 
 Scene::Scene(const std::string& name)
-    : globalRow(0), lightSky(0.671f, 0.851f, 1.0f), darkSky(0.239f, 0.29f, 0.761f), name(name) { }
+    : name(name),
+      globalRow(0),
+      bvh(objects),
+      lightSky(0.671f, 0.851f, 1.0f), darkSky(0.239f, 0.29f, 0.761f) { }
 
 Scene::~Scene() {
     for(const Object* object : objects) { delete object; }
@@ -25,6 +28,8 @@ void Scene::render(unsigned int width, unsigned int height) {
     if(width == 0 || height == 0) { throw std::runtime_error("Cannot render to an empty image."); }
 
     std::cout << "Rendering scene \"" << name << "\" to a " << width << " by " << height << " image.\n";
+
+    bvh.initialize();
 
     Image image(width, height);
     std::vector<std::thread> threads;
@@ -164,7 +169,8 @@ Color Scene::computePixel(Point extremity) const {
 
     const Ray ray(camera, normalize(Vector(camera, extremity)));
 
-    Hit closest = getClosestHit(ray);
+    // Hit closest = getClosestHit(ray);
+    Hit closest = bvh.intersect(ray);
     if(closest.object == nullptr) { return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f); }
 
     Point point = ray.getPoint(closest.intersection);
