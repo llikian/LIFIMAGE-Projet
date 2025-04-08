@@ -192,10 +192,14 @@ void scene8(unsigned int width, unsigned int height) {
     scene.setDarkSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-2.0f, 2.0f, 1.0f)));
+    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(0.0f, 2.0f, 1.0f)));
 
     /* ---- Objects ---- */
-    scene.add("data/synthese/dragon80k.obj", translate(0.0f, 0.2f, -4.0f).scale(6.0f).rotateY(90.0f), Red(), false);
+    MeshIOData dragon;
+    read_meshio_data("data/synthese/dragon80k.obj", dragon);
+    scene.add(dragon, translate(0.0f, 0.75f, -4.0f).scale(6.0f).rotateY(75.0f), Red(), false);
+    scene.add(dragon, translate(-0.5f, -0.75f, -1.5f).scale(1.5f).rotateY(-75.0f), Blue(), false);
+    scene.add(dragon, translate(0.5f, -0.75f, -1.2f).scale(0.5f).rotateY(75.0f), Green(), false);
 
     scene.render(width, height);
 }
@@ -225,8 +229,8 @@ int main() {
         // scene5(1024, 512);
         // scene6(768, 512);
         // scene7(512, 512);
-        // scene8(1024, 1024);
-        scene9(512, 512);
+        scene8(1024, 1024);
+        // scene9(512, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;
