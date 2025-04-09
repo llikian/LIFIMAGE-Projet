@@ -224,13 +224,13 @@ void scene9(unsigned int width, unsigned int height) {
 
 int main() {
     try {
-        scene1(1024, 512);
-        scene2(1024, 512);
-        scene3(1024, 512);
-        scene4(1024, 512);
-        scene5(1024, 512);
-        scene6(768, 512);
-        scene7(512, 512);
+        // scene1(1024, 512);
+        // scene2(1024, 512);
+        // scene3(1024, 512);
+        // scene4(1024, 512);
+        // scene5(1024, 512);
+        // scene6(768, 512);
+        // scene7(512, 512);
         scene8(1024, 1024);
         // scene9(512, 512);
     } catch(const std::exception& exception) {

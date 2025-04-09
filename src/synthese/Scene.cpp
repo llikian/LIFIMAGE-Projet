@@ -232,7 +232,7 @@ void Scene::printSceneInfo() const {
 
     int objectCounts[objectTypeCount];
     for(int& objectCount : objectCounts) { objectCount = 0; }
-    for(const Plane* plane : planes) { objectCounts[static_cast<unsigned char>(ObjectType::Plane)]++; }
+    objectCounts[static_cast<unsigned char>(ObjectType::Plane)] += planes.size();
     for(const Object* object : objects) { objectCounts[static_cast<unsigned char>(object->getType())]++; }
 
     std::cout << "\tThere are:\n";
@@ -243,10 +243,10 @@ void Scene::printSceneInfo() const {
             switch(type) {
                 case LightType::DirectionalLight:
                     std::cout << "Directional Light" << (lightCounts[i] > 1 ? "s" : "");
-                break;
+                    break;
                 case LightType::PointLight:
                     std::cout << "Point Light" << (lightCounts[i] > 1 ? "s" : "");
-                break;
+                    break;
                 default:
                     break;
             }
@@ -261,16 +261,16 @@ void Scene::printSceneInfo() const {
             switch(type) {
                 case ObjectType::Plane:
                     std::cout << "Plane" << (objectCounts[i] > 1 ? "s" : "");
-                break;
+                    break;
                 case ObjectType::Sphere:
                     std::cout << "Sphere" << (objectCounts[i] > 1 ? "s" : "");
-                break;
+                    break;
                 case ObjectType::Triangle:
                     std::cout << "Triangle" << (objectCounts[i] > 1 ? "s" : "");
-                break;
+                    break;
                 case ObjectType::MeshTriangle:
                     std::cout << "MeshTriangle" << (objectCounts[i] > 1 ? "s" : "");
-                break;
+                    break;
                 default:
                     break;
             }
