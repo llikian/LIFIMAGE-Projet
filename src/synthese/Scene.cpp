@@ -67,15 +67,27 @@ void Scene::add(const Plane* plane) {
 }
 
 void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color, bool smooth) {
-    MeshIOData data;
-    read_meshio_data(meshPath.c_str(), data);
-    add(data, transform, color, smooth);
+    if(smooth) {
+        MeshIOData data;
+        read_meshio_data(meshPath.c_str(), data);
+        add(data, transform, color, smooth);
+    } else {
+        std::vector<Point> positions;
+        read_positions("data/synthese/cube.obj", positions);
+        add(positions, transform, color);
+    }
 }
 
 void Scene::add(const std::string& meshPath, const mat4& transform, const ColorFunc& getColor, bool smooth) {
-    MeshIOData data;
-    read_meshio_data(meshPath.c_str(), data);
-    add(data, transform, getColor, smooth);
+    if(smooth) {
+        MeshIOData data;
+        read_meshio_data(meshPath.c_str(), data);
+        add(data, transform, getColor, smooth);
+    } else {
+        std::vector<Point> positions;
+        read_positions("data/synthese/cube.obj", positions);
+        add(positions, transform, getColor);
+    }
 }
 
 void Scene::add(const MeshIOData& data, const mat4& transform, const Color& color, bool smooth) {
