@@ -28,6 +28,7 @@ void Scene::render(unsigned int width, unsigned int height) {
     if(width == 0 || height == 0) { throw std::runtime_error("Cannot render to an empty image."); }
 
     std::cout << "Rendering scene \"" << name << "\" to a " << width << " by " << height << " image.\n";
+    printSceneInfo();
 
     bvh.initialize();
 
@@ -71,6 +72,12 @@ void Scene::add(const std::string& meshPath, const mat4& transform, const Color&
     add(data, transform, color, smooth);
 }
 
+void Scene::add(const std::string& meshPath, const mat4& transform, const ColorFunc& getColor, bool smooth) {
+    MeshIOData data;
+    read_meshio_data(meshPath.c_str(), data);
+    add(data, transform, getColor, smooth);
+}
+
 void Scene::add(const MeshIOData& data, const mat4& transform, const Color& color, bool smooth) {
     for(unsigned int i = 0 ; i + 2 < data.indices.size() ; i += 3) {
         unsigned int index0 = data.indices.at(i);
@@ -91,9 +98,38 @@ void Scene::add(const MeshIOData& data, const mat4& transform, const Color& colo
     }
 }
 
+void Scene::add(const MeshIOData& data, const mat4& transform, const ColorFunc& getColor, bool smooth) {
+    for(unsigned int i = 0 ; i + 2 < data.indices.size() ; i += 3) {
+        unsigned int index0 = data.indices.at(i);
+        unsigned int index1 = data.indices.at(i + 1);
+        unsigned int index2 = data.indices.at(i + 2);
+
+        if(smooth) {
+            add(new MeshTriangle(getColor,
+                                 Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
+                                 Vertex(transform * data.positions.at(index1), data.normals.at(index1)),
+                                 Vertex(transform * data.positions.at(index2), data.normals.at(index2))));
+        } else {
+            add(new Triangle(getColor,
+                             transform * data.positions.at(index0),
+                             transform * data.positions.at(index1),
+                             transform * data.positions.at(index2)));
+        }
+    }
+}
+
 void Scene::add(const std::vector<Point>& positions, const mat4& transform, const Color& color) {
     for(unsigned int i = 0 ; i + 2 < positions.size() ; i += 3) {
         add(new Triangle(color,
+                         transform * positions[i],
+                         transform * positions[i + 1],
+                         transform * positions[i + 2]));
+    }
+}
+
+void Scene::add(const std::vector<Point>& positions, const mat4& transform, const ColorFunc& getColor) {
+    for(unsigned int i = 0 ; i + 2 < positions.size() ; i += 3) {
+        add(new Triangle(getColor,
                          transform * positions[i],
                          transform * positions[i + 1],
                          transform * positions[i + 2]));
@@ -184,4 +220,61 @@ Color Scene::computePixel(Point extremity) const {
     for(const Light* light : lights) { lightColor += light->calculate(closest, epsilonPoint, this); }
 
     return color * lightColor;
+}
+
+void Scene::printSceneInfo() const {
+    static constexpr unsigned char lightTypeCount = static_cast<unsigned char>(LightType::TYPE_COUNT);
+    static constexpr unsigned char objectTypeCount = static_cast<unsigned char>(ObjectType::TYPE_COUNT);
+
+    int lightCounts[lightTypeCount];
+    for(int& lightCount : lightCounts) { lightCount = 0; }
+    for(const Light* light : lights) { lightCounts[static_cast<unsigned char>(light->getType())]++; }
+
+    int objectCounts[objectTypeCount];
+    for(int& objectCount : objectCounts) { objectCount = 0; }
+    for(const Plane* plane : planes) { objectCounts[static_cast<unsigned char>(ObjectType::Plane)]++; }
+    for(const Object* object : objects) { objectCounts[static_cast<unsigned char>(object->getType())]++; }
+
+    std::cout << "\tThere are:\n";
+    for(unsigned int i = 0 ; i < lightTypeCount ; ++i) {
+        if(lightCounts[i] > 0) {
+            LightType type = static_cast<LightType>(i);
+            std::cout << "\t\t" << lightCounts[i] << ' ';
+            switch(type) {
+                case LightType::DirectionalLight:
+                    std::cout << "Directional Light" << (lightCounts[i] > 1 ? "s" : "");
+                break;
+                case LightType::PointLight:
+                    std::cout << "Point Light" << (lightCounts[i] > 1 ? "s" : "");
+                break;
+                default:
+                    break;
+            }
+            std::cout << '\n';
+        }
+    }
+
+    for(unsigned int i = 0 ; i < objectTypeCount ; ++i) {
+        if(objectCounts[i] > 0) {
+            ObjectType type = static_cast<ObjectType>(i);
+            std::cout << "\t\t" << objectCounts[i] << ' ';
+            switch(type) {
+                case ObjectType::Plane:
+                    std::cout << "Plane" << (objectCounts[i] > 1 ? "s" : "");
+                break;
+                case ObjectType::Sphere:
+                    std::cout << "Sphere" << (objectCounts[i] > 1 ? "s" : "");
+                break;
+                case ObjectType::Triangle:
+                    std::cout << "Triangle" << (objectCounts[i] > 1 ? "s" : "");
+                break;
+                case ObjectType::MeshTriangle:
+                    std::cout << "MeshTriangle" << (objectCounts[i] > 1 ? "s" : "");
+                break;
+                default:
+                    break;
+            }
+            std::cout << '\n';
+        }
+    }
 }

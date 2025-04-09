@@ -34,6 +34,10 @@ Plane::Plane(const Color& color, const Point& point, const Vector& normal)
 Plane::Plane(const ColorFunc& getColor, const Point& point, const Vector& normal)
     : Object(getColor), point(point), normal(normalize(normal)) { }
 
+ObjectType Plane::getType() const {
+    return ObjectType::Plane;
+}
+
 Hit Plane::intersect(const Ray& ray) const {
     Hit hit;
 
@@ -53,6 +57,10 @@ Sphere::Sphere(const Color& color, const Point& center, float radius)
 
 Sphere::Sphere(const ColorFunc& getColor, const Point& center, float radius)
     : Object(getColor), center(center), radius(radius) { }
+
+ObjectType Sphere::getType() const {
+    return ObjectType::Sphere;
+}
 
 Hit Sphere::intersect(const Ray& ray) const {
     Hit hit;
@@ -95,6 +103,10 @@ Triangle::Triangle(const Color& color, const Point& A, const Point& B, const Poi
 Triangle::Triangle(const ColorFunc& getColor, const Point& A, const Point& B, const Point& C)
     : Object(getColor), A(A), B(B), C(C) { }
 
+ObjectType Triangle::getType() const {
+    return ObjectType::Triangle;
+}
+
 Hit Triangle::intersect(const Ray& ray) const {
     Hit hit;
 
@@ -129,6 +141,10 @@ MeshTriangle::MeshTriangle(const Color& color, const Vertex& A, const Vertex& B,
 
 MeshTriangle::MeshTriangle(const ColorFunc& getColor, const Vertex& A, const Vertex& B, const Vertex& C)
     : Object(getColor), A(A), B(B), C(C) { }
+
+ObjectType MeshTriangle::getType() const {
+    return ObjectType::MeshTriangle;
+}
 
 Hit MeshTriangle::intersect(const Ray& ray) const {
     Hit hit;

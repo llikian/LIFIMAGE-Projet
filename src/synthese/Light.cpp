@@ -18,6 +18,10 @@ bool Light::isInShadow(const Object* object, const Ray& ray, const Scene* scene)
 DirectionalLight::DirectionalLight(const Color& color, const Vector& direction)
     : Light(color), direction(normalize(direction)) { }
 
+LightType DirectionalLight::getType() const {
+    return LightType::DirectionalLight;
+}
+
 Color DirectionalLight::calculate(const Hit& hit, const Point& point, const Scene* scene) const {
     Ray ray(point, direction);
 
@@ -30,6 +34,10 @@ Color DirectionalLight::calculate(const Hit& hit, const Point& point, const Scen
 
 PointLight::PointLight(const Color& color, const Point& position, float radius)
     : Light(color), position(position), radius(radius) { }
+
+LightType PointLight::getType() const {
+    return LightType::PointLight;
+}
 
 Color PointLight::calculate(const Hit& hit, const Point& point, const Scene* scene) const {
     Vector direction(point, position);

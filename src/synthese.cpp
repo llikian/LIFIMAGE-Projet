@@ -197,9 +197,11 @@ void scene8(unsigned int width, unsigned int height) {
     /* ---- Objects ---- */
     MeshIOData dragon;
     read_meshio_data("data/synthese/dragon80k.obj", dragon);
-    scene.add(dragon, translate(0.0f, 0.75f, -4.0f).scale(6.0f).rotateY(75.0f), Red(), false);
-    scene.add(dragon, translate(-0.5f, -0.75f, -1.5f).scale(1.5f).rotateY(-75.0f), Blue(), false);
-    scene.add(dragon, translate(0.5f, -0.75f, -1.2f).scale(0.5f).rotateY(75.0f), Green(), false);
+    scene.add(dragon, translate(0.0f, 0.75f, -4.0f).scale(6.0f).rotateY(75.0f), [](const Point& point) {
+        return lerp(White(), Color(0.922f, 0.216f, 0.216f), std::clamp(point.y / 2.0f, 0.0f, 1.0f));
+    }, false);
+    scene.add(dragon, translate(-0.5f, -0.75f, -1.5f).scale(1.5f).rotateY(-75.0f), Color(0.3f, 0.3f, 1.0f), false);
+    scene.add(dragon, translate(0.5f, -0.75f, -1.2f).scale(0.5f).rotateY(75.0f), Color(0.3f, 1.0f, 0.5f), false);
 
     scene.render(width, height);
 }
@@ -222,13 +224,13 @@ void scene9(unsigned int width, unsigned int height) {
 
 int main() {
     try {
-        // scene1(1024, 512);
-        // scene2(1024, 512);
-        // scene3(1024, 512);
-        // scene4(1024, 512);
-        // scene5(1024, 512);
-        // scene6(768, 512);
-        // scene7(512, 512);
+        scene1(1024, 512);
+        scene2(1024, 512);
+        scene3(1024, 512);
+        scene4(1024, 512);
+        scene5(1024, 512);
+        scene6(768, 512);
+        scene7(512, 512);
         scene8(1024, 1024);
         // scene9(512, 512);
     } catch(const std::exception& exception) {

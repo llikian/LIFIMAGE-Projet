@@ -11,9 +11,17 @@
 
 class Scene;
 
+enum class LightType : unsigned char {
+    DirectionalLight,
+    PointLight,
+    TYPE_COUNT
+};
+
 struct Light {
     explicit Light(const Color& color);
     virtual ~Light() = default;
+
+    virtual LightType getType() const = 0;
 
     virtual Color calculate(const Hit& hit, const Point& point, const Scene* scene) const = 0;
     static bool isInShadow(const Object* object, const Ray& ray, const Scene* scene);
@@ -24,6 +32,8 @@ struct Light {
 struct DirectionalLight : Light {
     DirectionalLight(const Color& color, const Vector& direction);
 
+    LightType getType() const override;
+
     Color calculate(const Hit& hit, const Point& point, const Scene* scene) const override;
 
     Vector direction;
@@ -31,6 +41,8 @@ struct DirectionalLight : Light {
 
 struct PointLight : Light {
     PointLight(const Color& color, const Point& position, float radius);
+
+    LightType getType() const override;
 
     Color calculate(const Hit& hit, const Point& point, const Scene* scene) const override;
 
