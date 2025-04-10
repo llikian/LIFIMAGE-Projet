@@ -24,6 +24,9 @@ void operator*=(Color& color, float scalar);
 void operator*=(Color& color, const Color& color2);
 bool operator==(const Color& first, const Color& second);
 
+vec2 operator*(const vec2& vec, float scalar);
+vec2 operator*(float scalar, const vec2& vec);
+
 bool isValueSimilar(float value, float base, float epsilon);
 bool isColorSimilar(const Color& color, const Color& base, const Color& epsilon);
 
@@ -34,9 +37,29 @@ Color lerp(const Type& A, const Type& B, float t) {
     return A * (1.0f - t) + B * t;
 }
 
-float length(const vec2& vec);
-float length(const vec3& vec);
-float length(const vec4& vec);
+inline float length(const vec2& vec) {
+    return std::sqrt(vec.x * vec.x + vec.y * vec.y);
+}
+
+inline float length(const vec3& vec) {
+    return std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+
+inline float length(const vec4& vec) {
+    return std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z + vec.w * vec.w);
+}
+
+inline float dot(const vec2& vec, const vec2& other) {
+    return vec.x * other.x + vec.y * other.y;
+}
+
+inline float dot(const vec3& vec, const vec3& other) {
+    return vec.x * other.x + vec.y * other.y + vec.z * other.z;
+}
+
+inline float dot(const vec4& vec, const vec4& other) {
+    return vec.x * other.x + vec.y * other.y + vec.z * other.z + vec.w * other.w;
+}
 
 inline float radians(float deg) {
     return deg * M_PIf / 180.0f;

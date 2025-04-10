@@ -44,6 +44,14 @@ bool operator==(const Color& first, const Color& second) {
     return first.r == second.r && first.g == second.g && first.b == second.b;
 }
 
+vec2 operator*(const vec2& vec, float scalar) {
+    return vec2(vec.x * scalar, vec.y * scalar);
+}
+
+vec2 operator*(float scalar, const vec2& vec) {
+    return vec2(scalar * vec.x, scalar * vec.y);
+}
+
 bool isValueSimilar(float value, float base, float epsilon) {
     return value >= base - epsilon && value <= base + epsilon;
 }
@@ -65,18 +73,6 @@ void write_boolean_array_as_grayscale_image(const std::string& path, const Array
 
     stbi_flip_vertically_on_write(false);
     stbi_write_png(path.c_str(), data.rows, data.columns, 1, temp.data(), 0);
-}
-
-float length(const vec2& vec) {
-    return std::sqrt(vec.x * vec.x + vec.y * vec.y);
-}
-
-float length(const vec3& vec) {
-    return std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-}
-
-float length(const vec4& vec) {
-    return std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z + vec.w * vec.w);
 }
 
 bool operator!=(const Vector& vec, const Vector& other) {
