@@ -32,12 +32,12 @@ public:
     void add(const Light* light);
     void add(const Object* object);
     void add(const Plane* plane);
-    void add(const std::string& meshPath, const mat4& transform, const Color& color = White(), bool smooth = false);
     void add(const std::string& meshPath, const mat4& transform, const ColorFunc& getColor, bool smooth = false);
-    void add(const MeshIOData& data, const mat4& transform, const Color& color = White(), bool smooth = false);
+    void add(const std::string& meshPath, const mat4& transform, const Color& color = White(), bool smooth = false);
     void add(const MeshIOData& data, const mat4& transform, const ColorFunc& getColor, bool smooth = false);
-    void add(const std::vector<Point>& positions, const mat4& transform, const Color& color = White());
+    void add(const MeshIOData& data, const mat4& transform, const Color& color = White(), bool smooth = false);
     void add(const std::vector<Point>& positions, const mat4& transform, const ColorFunc& getColor);
+    void add(const std::vector<Point>& positions, const mat4& transform, const Color& color = White());
 
     Hit getClosestHit(const Ray& ray) const;
 

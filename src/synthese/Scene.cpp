@@ -66,18 +66,6 @@ void Scene::add(const Plane* plane) {
     planes.push_back(plane);
 }
 
-void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color, bool smooth) {
-    if(smooth) {
-        MeshIOData data;
-        read_meshio_data(meshPath.c_str(), data);
-        add(data, transform, color, smooth);
-    } else {
-        std::vector<Point> positions;
-        read_positions(meshPath.c_str(), positions);
-        add(positions, transform, color);
-    }
-}
-
 void Scene::add(const std::string& meshPath, const mat4& transform, const ColorFunc& getColor, bool smooth) {
     if(smooth) {
         MeshIOData data;
@@ -90,24 +78,8 @@ void Scene::add(const std::string& meshPath, const mat4& transform, const ColorF
     }
 }
 
-void Scene::add(const MeshIOData& data, const mat4& transform, const Color& color, bool smooth) {
-    for(unsigned int i = 0 ; i + 2 < data.indices.size() ; i += 3) {
-        unsigned int index0 = data.indices.at(i);
-        unsigned int index1 = data.indices.at(i + 1);
-        unsigned int index2 = data.indices.at(i + 2);
-
-        if(smooth) {
-            add(new MeshTriangle(color,
-                                 Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
-                                 Vertex(transform * data.positions.at(index1), data.normals.at(index1)),
-                                 Vertex(transform * data.positions.at(index2), data.normals.at(index2))));
-        } else {
-            add(new Triangle(color,
-                             transform * data.positions.at(index0),
-                             transform * data.positions.at(index1),
-                             transform * data.positions.at(index2)));
-        }
-    }
+void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color, bool smooth) {
+    add(meshPath, transform,  [color](const Point&) { return color; }, smooth);
 }
 
 void Scene::add(const MeshIOData& data, const mat4& transform, const ColorFunc& getColor, bool smooth) {
@@ -130,13 +102,8 @@ void Scene::add(const MeshIOData& data, const mat4& transform, const ColorFunc& 
     }
 }
 
-void Scene::add(const std::vector<Point>& positions, const mat4& transform, const Color& color) {
-    for(unsigned int i = 0 ; i + 2 < positions.size() ; i += 3) {
-        add(new Triangle(color,
-                         transform * positions[i],
-                         transform * positions[i + 1],
-                         transform * positions[i + 2]));
-    }
+void Scene::add(const MeshIOData& data, const mat4& transform, const Color& color, bool smooth) {
+    add(data, transform,  [color](const Point&) { return color; }, smooth);
 }
 
 void Scene::add(const std::vector<Point>& positions, const mat4& transform, const ColorFunc& getColor) {
@@ -146,6 +113,10 @@ void Scene::add(const std::vector<Point>& positions, const mat4& transform, cons
                          transform * positions[i + 1],
                          transform * positions[i + 2]));
     }
+}
+
+void Scene::add(const std::vector<Point>& positions, const mat4& transform, const Color& color) {
+    add(positions, transform,  [color](const Point&) { return color; });
 }
 
 Hit Scene::getClosestHit(const Ray& ray) const {
