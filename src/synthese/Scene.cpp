@@ -251,18 +251,15 @@ void Scene::printSceneInfo() const {
     for(unsigned int i = 0 ; i < lightTypeCount ; ++i) {
         if(lightCounts[i] > 0) {
             LightType type = static_cast<LightType>(i);
+
             std::cout << "\t\t" << lightCounts[i] << ' ';
             switch(type) {
-                case LightType::DirectionalLight:
-                    std::cout << "Directional Light" << (lightCounts[i] > 1 ? "s" : "");
-                    break;
-                case LightType::PointLight:
-                    std::cout << "Point Light" << (lightCounts[i] > 1 ? "s" : "");
-                    break;
-                default:
-                    break;
+                case LightType::DirectionalLight: std::cout << "Directional Light"; break;
+                case LightType::PointLight: std::cout << "Point Light"; break;
+                default: break;
             }
-            std::cout << '\n';
+
+            std::cout << (lightCounts[i] > 1 ? "s" : "") << '\n';
         }
     }
 
@@ -270,23 +267,16 @@ void Scene::printSceneInfo() const {
         if(objectCounts[i] > 0) {
             ObjectType type = static_cast<ObjectType>(i);
             std::cout << "\t\t" << objectCounts[i] << ' ';
+
             switch(type) {
-                case ObjectType::Plane:
-                    std::cout << "Plane" << (objectCounts[i] > 1 ? "s" : "");
-                    break;
-                case ObjectType::Sphere:
-                    std::cout << "Sphere" << (objectCounts[i] > 1 ? "s" : "");
-                    break;
-                case ObjectType::Triangle:
-                    std::cout << "Triangle" << (objectCounts[i] > 1 ? "s" : "");
-                    break;
-                case ObjectType::MeshTriangle:
-                    std::cout << "MeshTriangle" << (objectCounts[i] > 1 ? "s" : "");
-                    break;
-                default:
-                    break;
+                case ObjectType::Plane: std::cout << "Plane"; break;
+                case ObjectType::Sphere: std::cout << "Sphere"; break;
+                case ObjectType::Triangle: std::cout << "Triangle"; break;
+                case ObjectType::MeshTriangle: std::cout << "MeshTriangle"; break;
+                default: break;
             }
-            std::cout << '\n';
+
+            std::cout << (objectCounts[i] > 1 ? "s" : "") << '\n';
         }
     }
 }
