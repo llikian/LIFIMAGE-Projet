@@ -73,7 +73,7 @@ void Scene::add(const std::string& meshPath, const mat4& transform, const Color&
         add(data, transform, color, smooth);
     } else {
         std::vector<Point> positions;
-        read_positions("data/synthese/cube.obj", positions);
+        read_positions(meshPath.c_str(), positions);
         add(positions, transform, color);
     }
 }
@@ -85,7 +85,7 @@ void Scene::add(const std::string& meshPath, const mat4& transform, const ColorF
         add(data, transform, getColor, smooth);
     } else {
         std::vector<Point> positions;
-        read_positions("data/synthese/cube.obj", positions);
+        read_positions(meshPath.c_str(), positions);
         add(positions, transform, getColor);
     }
 }
