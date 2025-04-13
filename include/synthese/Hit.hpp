@@ -18,7 +18,7 @@ static constexpr float infinity = std::numeric_limits<float>::infinity();
  */
 struct Hit {
     /**
-     * @brief Default Constructor. Intersection set at infinity.
+     * @brief Default Constructor. Intersection set to infinity.
      */
     Hit();
 
