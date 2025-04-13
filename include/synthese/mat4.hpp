@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <ostream>
 #include "vec.h"
 
 /**
@@ -289,8 +288,34 @@ mat4 operator *(float scalar, const mat4& mat);
  */
 mat4 operator /(const mat4& mat, float scalar);
 
-
+/**
+ * @brief Multiplies a point with a matrix.
+ * @param mat The matrix.
+ * @param point The point. Used as a column matrix [point.x, point.y, point.z, 1]^T.
+ * @return The product of the matrix and the point.
+ */
 Point operator*(const mat4& mat, const Point& point);
+
+/**
+ * @brief Multiplies a vector with a matrix.
+ * @param mat The matrix.
+ * @param vec The vector. Used as a column matrix [vec.x, vec.y, vec.z, 0]^T.
+ * @return The product of the matrix and the vector.
+ */
 Vector operator*(const mat4& mat, const Vector& vec);
+
+/**
+ * @brief Multiplies a vec3 with a matrix.
+ * @param mat The matrix.
+ * @param vec The vec3. Used as a column matrix [vec.x, vec.y, vec.z, 0]^T.
+ * @return The product of the matrix and the vec3.
+ */
 vec3 operator*(const mat4& mat, const vec3& vec);
+
+/**
+ * @brief Multiplies a vec4 with a matrix.
+ * @param mat The matrix.
+ * @param vec The vec4. Used as a column matrix [vec.x, vec.y, vec.z, vec.w]^T.
+ * @return The product of the matrix and the vec4.
+ */
 vec4 operator*(const mat4& mat, const vec4& vec);
