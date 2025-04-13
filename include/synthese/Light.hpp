@@ -38,7 +38,7 @@ struct Light {
     virtual ~Light() = default;
 
     /**
-     * @return The type of Light.
+     * @return The light's type.
      */
     virtual LightType getType() const = 0;
 
