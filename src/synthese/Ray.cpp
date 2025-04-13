@@ -5,8 +5,6 @@
 
 #include "synthese/Ray.hpp"
 
-Ray::Ray() { }
-
 Ray::Ray(const Point& origin, const Vector& direction) : origin(origin), direction(direction) { }
 
 Point Ray::getPoint(float t) const {
