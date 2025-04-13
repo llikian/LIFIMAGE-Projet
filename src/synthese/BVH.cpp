@@ -17,74 +17,24 @@ bool BVH::Node::intersect(const Ray& ray) const {
     return tmax >= tmin && tmin < infinity && tmax > 0;
 }
 
-BVH::BVH(std::vector<const Object*>& objects): objects(objects), nodes(nullptr), usedNodes(1), rootIndex(0) { }
-
-BVH::~BVH() {
-    delete[] nodes;
-}
+BVH::BVH(std::vector<const Object*>& objects): objects(objects), usedNodes(1), rootIndex(0) { }
 
 void BVH::initialize() {
+    objectIndices.clear();
+    nodes.clear();
+    usedNodes = 1;
+    rootIndex = 0;
+
     for(uint i = 0 ; i < objects.size() ; ++i) { objectIndices.push_back(i); }
 
-    nodes = new Node[objects.size() * 2 - 1];
+    nodes.reserve(objects.size() * 2 - 1);
 
     Node& root = nodes[rootIndex];
     root.left = 0;
-    root.firstPrimitiveIndex = 0;
-    root.primitiveCount = objects.size();
+    root.firstObjectIndex = 0;
+    root.objectCount = objects.size();
     updateBounds(rootIndex);
     subdivide(rootIndex);
-}
-
-void BVH::updateBounds(uint nodeIndex) const {
-    Node& node = nodes[nodeIndex];
-    node.pmin.x = node.pmin.y = node.pmin.z = infinity;
-    node.pmax.x = node.pmax.y = node.pmax.z = -infinity;
-    for(uint i = 0 ; i < node.primitiveCount ; ++i) {
-        objects.at(objectIndices.at(node.firstPrimitiveIndex + i))->compareBoundingBox(node.pmin, node.pmax);
-    }
-}
-
-void BVH::subdivide(uint nodeIndex) {
-    Node& node = nodes[nodeIndex];
-    if(node.primitiveCount <= 2) { return; }
-
-    Vector extent = node.pmax - node.pmin;
-
-    int axis = 0;
-    if(extent.y > extent(axis)) { axis = 1; }
-    if(extent.z > extent(axis)) { axis = 2; }
-
-    float bboxCenter = node.pmin(axis) + extent(axis) * 0.5f;
-
-    int i = node.firstPrimitiveIndex;
-    int j = i + node.primitiveCount - 1;
-    while(i <= j) {
-        if(objects.at(objectIndices.at(i))->getCentroid()(axis) < bboxCenter) {
-            ++i;
-        } else {
-            std::swap(objectIndices[i], objectIndices[j--]);
-        }
-    }
-
-    int leftCount = i - node.firstPrimitiveIndex;
-    if(leftCount == 0 || leftCount == node.primitiveCount) { return; }
-
-    int leftIndex = usedNodes++;
-    int rightIndex = usedNodes++;
-
-    nodes[leftIndex].firstPrimitiveIndex = node.firstPrimitiveIndex;
-    nodes[leftIndex].primitiveCount = leftCount;
-    nodes[rightIndex].firstPrimitiveIndex = i;
-    nodes[rightIndex].primitiveCount = node.primitiveCount - leftCount;
-    node.left = leftIndex;
-    node.primitiveCount = 0; // Shows this node isn"t a leaf anymore
-
-    updateBounds(leftIndex);
-    updateBounds(rightIndex);
-
-    subdivide(leftIndex);
-    subdivide(rightIndex);
 }
 
 Hit BVH::intersect(const Ray& ray) const {
@@ -92,14 +42,14 @@ Hit BVH::intersect(const Ray& ray) const {
 }
 
 Hit BVH::intersect(const Ray& ray, uint nodeIndex) const {
-    Node& node = nodes[nodeIndex];
+    const Node& node = nodes[nodeIndex];
     if(!node.intersect(ray)) { return Hit(); }
 
     if(node.isLeaf()) {
         Hit closest;
 
-        for(uint i = 0 ; i < node.primitiveCount ; i++) {
-            const Object* object = objects.at(objectIndices.at(node.firstPrimitiveIndex + i));
+        for(uint i = 0 ; i < node.objectCount ; i++) {
+            const Object* object = objects.at(objectIndices.at(node.firstObjectIndex + i));
             Hit hit = object->intersect(ray);
 
             if(hit.intersection != infinity && (closest.object == nullptr || hit.intersection < closest.intersection)) {
@@ -116,4 +66,55 @@ Hit BVH::intersect(const Ray& ray, uint nodeIndex) const {
 
         return hit1.intersection < hit2.intersection ? hit1 : hit2;
     }
+}
+
+void BVH::updateBounds(uint nodeIndex) {
+    Node& node = nodes[nodeIndex];
+    node.pmin.x = node.pmin.y = node.pmin.z = infinity;
+    node.pmax.x = node.pmax.y = node.pmax.z = -infinity;
+    for(uint i = 0 ; i < node.objectCount ; ++i) {
+        objects.at(objectIndices.at(node.firstObjectIndex + i))->compareBoundingBox(node.pmin, node.pmax);
+    }
+}
+
+void BVH::subdivide(uint nodeIndex) {
+    Node& node = nodes[nodeIndex];
+    if(node.objectCount <= 2) { return; }
+
+    Vector extent = node.pmax - node.pmin;
+
+    int axis = 0;
+    if(extent.y > extent(axis)) { axis = 1; }
+    if(extent.z > extent(axis)) { axis = 2; }
+
+    float bboxCenter = node.pmin(axis) + extent(axis) * 0.5f;
+
+    int i = node.firstObjectIndex;
+    int j = i + node.objectCount - 1;
+    while(i <= j) {
+        if(objects.at(objectIndices.at(i))->getCentroid()(axis) < bboxCenter) {
+            ++i;
+        } else {
+            std::swap(objectIndices[i], objectIndices[j--]);
+        }
+    }
+
+    int leftCount = i - node.firstObjectIndex;
+    if(leftCount == 0 || leftCount == node.objectCount) { return; }
+
+    int leftIndex = usedNodes++;
+    int rightIndex = usedNodes++;
+
+    nodes[leftIndex].firstObjectIndex = node.firstObjectIndex;
+    nodes[leftIndex].objectCount = leftCount;
+    nodes[rightIndex].firstObjectIndex = i;
+    nodes[rightIndex].objectCount = node.objectCount - leftCount;
+    node.left = leftIndex;
+    node.objectCount = 0; // Shows this node isn't a leaf anymore
+
+    updateBounds(leftIndex);
+    updateBounds(rightIndex);
+
+    subdivide(leftIndex);
+    subdivide(rightIndex);
 }
