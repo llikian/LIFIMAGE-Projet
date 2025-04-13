@@ -12,7 +12,7 @@
 #include "utility.hpp"
 
 void scene1(unsigned int width, unsigned int height) {
-    Scene scene("scene1");
+    Scene scene("01 - Sphere and Plane");
 
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
@@ -33,7 +33,7 @@ void scene1(unsigned int width, unsigned int height) {
 }
 
 void scene2(unsigned int width, unsigned int height) {
-    Scene scene("scene2");
+    Scene scene("02 - Point Lights");
 
     /* ---- Lights ---- */
     {
@@ -54,7 +54,7 @@ void scene2(unsigned int width, unsigned int height) {
 }
 
 void scene3(unsigned int width, unsigned int height) {
-    Scene scene("scene3");
+    Scene scene("03 - Cubes");
 
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
@@ -75,7 +75,7 @@ void scene3(unsigned int width, unsigned int height) {
 }
 
 void scene4(unsigned int width, unsigned int height) {
-    Scene scene("scene4");
+    Scene scene("04 - Weird Spheres");
 
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 4.0f)));
@@ -117,7 +117,7 @@ void scene4(unsigned int width, unsigned int height) {
 }
 
 void scene5(unsigned int width, unsigned int height) {
-    Scene scene("scene5");
+    Scene scene("05 - Dodecahedron and Cube");
 
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
@@ -131,11 +131,11 @@ void scene5(unsigned int width, unsigned int height) {
 }
 
 void scene6(unsigned int width, unsigned int height) {
-    Scene scene("scene6");
+    Scene scene("06 - The Suzanne of Suzanne");
 
     /* ---- Sky ---- */
-    scene.setLightSkyColor(0.3f, 0.3f, 0.3f);
-    scene.setDarkSkyColor(0.1f, 0.1f, 0.1f);
+    scene.setLowSkyColor(0.3f, 0.3f, 0.3f);
+    scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-2.0f, 2.0f, 1.0f)));
@@ -152,14 +152,14 @@ void scene6(unsigned int width, unsigned int height) {
 }
 
 void scene7(unsigned int width, unsigned int height) {
-    Scene scene("scene7");
+    Scene scene("07 - Sphere Rings");
 
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(0.0f, 0.0f, 1.0f)));
 
     /* ---- Objects ---- */
     /* Sphere Rings */ {
-        unsigned int rings = 32;
+        unsigned int rings = 1024;
         unsigned int spheres = 16;
 
         float radius = 0.35f;
@@ -185,23 +185,25 @@ void scene7(unsigned int width, unsigned int height) {
 }
 
 void scene8(unsigned int width, unsigned int height) {
-    Scene scene("scene8");
+    Scene scene("08 - Let There Be Dragons");
 
     /* ---- Sky ---- */
-    scene.setLightSkyColor(0.3f, 0.3f, 0.3f);
-    scene.setDarkSkyColor(0.1f, 0.1f, 0.1f);
+    scene.setLowSkyColor(0.3f, 0.3f, 0.3f);
+    scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
     scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(0.0f, 2.0f, 1.0f)));
 
     /* ---- Objects ---- */
     std::vector<Point> dragon;
-    read_positions("data/synthese/dragon80k.obj", dragon);
-    scene.add(dragon, translate(0.0f, 0.75f, -4.0f).scale(6.0f).rotateY(75.0f), [](const Point& point) {
+    std::vector<uint> indices;
+    read_indexed_positions("data/synthese/dragon80k.obj", dragon, indices);
+
+    scene.add(dragon, indices, translate(0.0f, 0.75f, -4.0f).scale(6.0f).rotateY(75.0f), [](const Point& point) {
         return lerp(White(), Color(0.922f, 0.216f, 0.216f), std::clamp(point.y / 2.0f, 0.0f, 1.0f));
     });
-    scene.add(dragon, translate(-0.5f, -0.75f, -1.5f).scale(1.5f).rotateY(-75.0f), Color(0.3f, 0.3f, 1.0f));
-    scene.add(dragon, translate(0.5f, -0.75f, -1.2f).scale(0.5f).rotateY(75.0f), Color(0.3f, 1.0f, 0.5f));
+    scene.add(dragon, indices, translate(-0.5f, -0.75f, -1.5f).scale(1.5f).rotateY(-75.0f), Color(0.3f, 0.3f, 1.0f));
+    scene.add(dragon, indices, translate(0.5f, -0.75f, -1.2f).scale(0.5f).rotateY(75.0f), Color(0.3f, 1.0f, 0.5f));
 
     scene.render(width, height);
 }
@@ -214,7 +216,7 @@ int main() {
         scene4(1024, 512);
         scene5(1024, 512);
         scene6(768, 512);
-        scene7(512, 512);
+        scene7(4096, 4096);
         scene8(1024, 1024);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';

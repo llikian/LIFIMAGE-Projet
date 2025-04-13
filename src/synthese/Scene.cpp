@@ -16,11 +16,12 @@ Scene::Scene(const std::string& name)
     : name(name),
       globalRow(0),
       bvh(objects),
-      lightSky(0.671f, 0.851f, 1.0f), darkSky(0.239f, 0.29f, 0.761f) { }
+      lowSkyColor(0.671f, 0.851f, 1.0f), highSkyColor(0.239f, 0.29f, 0.761f) { }
 
 Scene::~Scene() {
-    for(const Object* object : objects) { delete object; }
     for(const Light* light : lights) { delete light; }
+    for(const Object* object : objects) { delete object; }
+    for(const Plane* plane : planes) {delete plane;}
 }
 
 void Scene::render(unsigned int width, unsigned int height) {
@@ -79,31 +80,27 @@ void Scene::add(const std::string& meshPath, const mat4& transform, const ColorF
 }
 
 void Scene::add(const std::string& meshPath, const mat4& transform, const Color& color, bool smooth) {
-    add(meshPath, transform,  [color](const Point&) { return color; }, smooth);
+    add(meshPath, transform, [color](const Point&) { return color; }, smooth);
 }
 
 void Scene::add(const MeshIOData& data, const mat4& transform, const ColorFunc& getColor, bool smooth) {
+    if(smooth) { } else {
+        add(data.positions, data.indices, transform, getColor);
+    }
     for(unsigned int i = 0 ; i + 2 < data.indices.size() ; i += 3) {
         unsigned int index0 = data.indices.at(i);
         unsigned int index1 = data.indices.at(i + 1);
         unsigned int index2 = data.indices.at(i + 2);
 
-        if(smooth) {
-            add(new MeshTriangle(getColor,
-                                 Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
-                                 Vertex(transform * data.positions.at(index1), data.normals.at(index1)),
-                                 Vertex(transform * data.positions.at(index2), data.normals.at(index2))));
-        } else {
-            add(new Triangle(getColor,
-                             transform * data.positions.at(index0),
-                             transform * data.positions.at(index1),
-                             transform * data.positions.at(index2)));
-        }
+        add(new MeshTriangle(getColor,
+                             Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
+                             Vertex(transform * data.positions.at(index1), data.normals.at(index1)),
+                             Vertex(transform * data.positions.at(index2), data.normals.at(index2))));
     }
 }
 
 void Scene::add(const MeshIOData& data, const mat4& transform, const Color& color, bool smooth) {
-    add(data, transform,  [color](const Point&) { return color; }, smooth);
+    add(data, transform, [color](const Point&) { return color; }, smooth);
 }
 
 void Scene::add(const std::vector<Point>& positions, const mat4& transform, const ColorFunc& getColor) {
@@ -116,7 +113,26 @@ void Scene::add(const std::vector<Point>& positions, const mat4& transform, cons
 }
 
 void Scene::add(const std::vector<Point>& positions, const mat4& transform, const Color& color) {
-    add(positions, transform,  [color](const Point&) { return color; });
+    add(positions, transform, [color](const Point&) { return color; });
+}
+
+void Scene::add(const std::vector<Point>& positions,
+                const std::vector<uint>& indices,
+                const mat4& transform,
+                const ColorFunc& getColor) {
+    for(unsigned int i = 0 ; i + 2 < indices.size() ; i += 3) {
+        add(new Triangle(getColor,
+                         transform * positions.at(indices.at(i)),
+                         transform * positions.at(indices.at(i + 1)),
+                         transform * positions.at(indices.at(i + 2))));
+    }
+}
+
+void Scene::add(const std::vector<Point>& positions,
+                const std::vector<uint>& indices,
+                const mat4& transform,
+                const Color& color) {
+    add(positions, indices, transform, [color](const Point&) { return color; });
 }
 
 Hit Scene::getClosestHit(const Ray& ray) const {
@@ -135,16 +151,16 @@ Hit Scene::getClosestHit(const Ray& ray) const {
     return closest;
 }
 
-void Scene::setLightSkyColor(float r, float g, float b) {
-    lightSky.r = r;
-    lightSky.g = g;
-    lightSky.b = b;
+void Scene::setLowSkyColor(float r, float g, float b) {
+    lowSkyColor.r = r;
+    lowSkyColor.g = g;
+    lowSkyColor.b = b;
 }
 
-void Scene::setDarkSkyColor(float r, float g, float b) {
-    darkSky.r = r;
-    darkSky.g = g;
-    darkSky.b = b;
+void Scene::setHighSkyColor(float r, float g, float b) {
+    highSkyColor.r = r;
+    highSkyColor.g = g;
+    highSkyColor.b = b;
 }
 
 void Scene::computeImage(Image& image) {
@@ -193,7 +209,7 @@ Color Scene::computePixel(Point extremity) const {
     const Ray ray(camera, normalize(Vector(camera, extremity)));
 
     Hit closest = getClosestHit(ray);
-    if(closest.object == nullptr) { return lerp(lightSky, darkSky, (1.0f + dot(ray.direction, horizon)) / 2.0f); }
+    if(closest.object == nullptr) { return lerp(lowSkyColor, highSkyColor, (1.0f + dot(ray.direction, horizon)) / 2.0f); }
 
     Point point = ray.getPoint(closest.intersection);
     Point epsilonPoint = ray.getEpsilonPoint(closest);
@@ -225,8 +241,10 @@ void Scene::printSceneInfo() const {
 
             std::cout << "\t\t" << lightCounts[i] << ' ';
             switch(type) {
-                case LightType::DirectionalLight: std::cout << "Directional Light"; break;
-                case LightType::PointLight: std::cout << "Point Light"; break;
+                case LightType::DirectionalLight: std::cout << "Directional Light";
+                    break;
+                case LightType::PointLight: std::cout << "Point Light";
+                    break;
                 default: break;
             }
 
@@ -240,10 +258,14 @@ void Scene::printSceneInfo() const {
             std::cout << "\t\t" << objectCounts[i] << ' ';
 
             switch(type) {
-                case ObjectType::Plane: std::cout << "Plane"; break;
-                case ObjectType::Sphere: std::cout << "Sphere"; break;
-                case ObjectType::Triangle: std::cout << "Triangle"; break;
-                case ObjectType::MeshTriangle: std::cout << "MeshTriangle"; break;
+                case ObjectType::Plane: std::cout << "Plane";
+                    break;
+                case ObjectType::Sphere: std::cout << "Sphere";
+                    break;
+                case ObjectType::Triangle: std::cout << "Triangle";
+                    break;
+                case ObjectType::MeshTriangle: std::cout << "MeshTriangle";
+                    break;
                 default: break;
             }
 

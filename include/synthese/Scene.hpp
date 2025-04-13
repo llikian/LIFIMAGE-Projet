@@ -32,17 +32,25 @@ public:
     void add(const Light* light);
     void add(const Object* object);
     void add(const Plane* plane);
+
     void add(const std::string& meshPath, const mat4& transform, const ColorFunc& getColor, bool smooth = false);
     void add(const std::string& meshPath, const mat4& transform, const Color& color = White(), bool smooth = false);
+
     void add(const MeshIOData& data, const mat4& transform, const ColorFunc& getColor, bool smooth = false);
     void add(const MeshIOData& data, const mat4& transform, const Color& color = White(), bool smooth = false);
+
     void add(const std::vector<Point>& positions, const mat4& transform, const ColorFunc& getColor);
     void add(const std::vector<Point>& positions, const mat4& transform, const Color& color = White());
 
+    void add(const std::vector<Point>& positions, const std::vector<uint>& indices,
+             const mat4& transform, const ColorFunc& getColor);
+    void add(const std::vector<Point>& positions, const std::vector<uint>& indices,
+             const mat4& transform, const Color& color = White());
+
     Hit getClosestHit(const Ray& ray) const;
 
-    void setLightSkyColor(float r, float g, float b);
-    void setDarkSkyColor(float r, float g, float b);
+    void setLowSkyColor(float r, float g, float b);
+    void setHighSkyColor(float r, float g, float b);
 
 private:
     void computeImage(Image& image);
@@ -61,6 +69,6 @@ private:
 
     BVH bvh;
 
-    Color lightSky;
-    Color darkSky;
+    Color lowSkyColor;
+    Color highSkyColor;
 };
