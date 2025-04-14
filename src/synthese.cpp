@@ -15,13 +15,15 @@ void scene1(unsigned int width, unsigned int height) {
     Scene scene("01 - Sphere and Plane");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(-4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(4.0f, 6.0f, 1.0f)));
 
     /* ---- Objects ---- */
     scene.add(new Plane([](const Point& point) {
         return std::fmod(floor(point.x) + floor(point.z), 2.0f) == 0.0f ? White() : Black(); // Checker
-    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f))); {
+    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+
+    /* Sphere */ {
         Point center(0.0f, 0.0f, -3.0f);
         scene.add(new Sphere([center](const Point& point) {
             Vector v = (normalize(point - center) + Vector(1.0f, 1.0f, 1.0f)) / 2.0f;
@@ -57,12 +59,14 @@ void scene3(unsigned int width, unsigned int height) {
     Scene scene("03 - Cubes");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(-4.0f, 6.0f, 1.0f)));
 
     /* ---- Objects ---- */
     scene.add(new Plane([](const Point& point) {
         return std::fmod(floor(point.x) + floor(point.z), 2.0f) == 0.0f ? White() : Black(); // Checker
-    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f))); {
+    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+
+    /* Cubes */ {
         std::vector<Point> positions;
         read_positions("data/synthese/cube.obj", positions);
 
@@ -78,7 +82,7 @@ void scene4(unsigned int width, unsigned int height) {
     Scene scene("04 - Weird Spheres");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 4.0f)));
+    scene.add(new DirectionalLight(White(), Vector(-4.0f, 6.0f, 4.0f)));
 
     /* ---- Objects ---- */
     scene.add(new Plane([](const Point& point) {
@@ -120,8 +124,8 @@ void scene5(unsigned int width, unsigned int height) {
     Scene scene("05 - Dodecahedron and Cube");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(-4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(4.0f, 6.0f, 1.0f)));
 
     /* ---- Objects ---- */
     scene.add("data/synthese/dodecahedron.obj", translate(-2.0f, 0.0f, -4.0f).scale(2.0f), White());
@@ -138,8 +142,11 @@ void scene6(unsigned int width, unsigned int height) {
     scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-2.0f, 2.0f, 1.0f)));
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(2.0f, -2.0f, 1.0f)));
+    // scene.add(new DirectionalLight(White(), Vector(-2.0f, 2.0f, 1.0f)));
+    // scene.add(new DirectionalLight(White(), Vector(2.0f, -2.0f, 1.0f)));
+
+    scene.add(new PointLight(White(), Point(-1.0f, 1.0f, 1.0f), 4.5f));
+    scene.add(new PointLight(White(), Point(1.0f, -1.0f, 1.0f), 4.5f));
 
     /* ---- Objects ---- */
     MeshIOData suzanne;
@@ -155,7 +162,7 @@ void scene7(unsigned int width, unsigned int height) {
     Scene scene("07 - Sphere Rings");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(0.0f, 0.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(0.0f, 0.0f, 1.0f)));
 
     /* ---- Objects ---- */
     /* Sphere Rings */ {
@@ -187,14 +194,12 @@ void scene7(unsigned int width, unsigned int height) {
 void scene8(unsigned int width, unsigned int height) {
     Scene scene("08 - Let There Be Dragons");
 
-    /* ---- Sky ---- */
-    scene.setLowSkyColor(0.3f, 0.3f, 0.3f);
-    scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
-
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(0.0f, 2.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(0.0f, 2.0f, 1.0f)));
 
     /* ---- Objects ---- */
+    scene.add(new Plane(Color(0.3f, 0.3f, 0.3f), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+
     std::vector<Point> dragon;
     std::vector<uint> indices;
     read_indexed_positions("data/synthese/dragon80k.obj", dragon, indices);
@@ -202,7 +207,7 @@ void scene8(unsigned int width, unsigned int height) {
     scene.add(dragon, indices, translate(0.0f, 0.75f, -4.0f).scale(6.0f).rotateY(75.0f), [](const Point& point) {
         return lerp(White(), Color(0.922f, 0.216f, 0.216f), std::clamp(point.y / 2.0f, 0.0f, 1.0f));
     });
-    scene.add(dragon, indices, translate(-0.5f, -0.75f, -1.5f).scale(1.5f).rotateY(-75.0f), Color(0.3f, 0.3f, 1.0f));
+    scene.add(dragon, indices, translate(-0.5f, -0.5f, -1.5f).scale(1.5f).rotateY(-75.0f), Color(0.3f, 0.3f, 1.0f));
     scene.add(dragon, indices, translate(0.5f, -0.75f, -1.2f).scale(0.5f).rotateY(75.0f), Color(0.3f, 1.0f, 0.5f));
 
     scene.render(width, height);
