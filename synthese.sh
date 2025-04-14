@@ -1,5 +1,4 @@
 #!/bin/bash
 
-[ -e build/ ] && rm -r build/*
-cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j --target Synthese && \
-bin/Synthese
+[ -e build ] && rm -rf build
+cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j --target Synthese && bin/Synthese
