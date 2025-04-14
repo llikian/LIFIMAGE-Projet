@@ -9,6 +9,7 @@
 #include <string>
 #include <vec.h>
 
+#include "analyse/uvec2.hpp"
 #include "Array2D.hpp"
 #include "color.h"
 
@@ -83,4 +84,12 @@ inline Point max3(const Point& point, const Point& other) {
     return Point(std::max(point.x, other.x),
                  std::max(point.y, other.y),
                  std::max(point.z, other.z));
+}
+
+inline float triangle_area(uvec2 a, uvec2 b, uvec2 c) {
+    return 0.5f * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
+}
+
+inline bool is_in_triangle(uvec2 p, uvec2 a, uvec2 b, uvec2 c) {
+    return triangle_area(a, b, c) >= triangle_area(p, b, c) + triangle_area(a, p, c) + triangle_area(a, b, p);
 }

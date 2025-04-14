@@ -9,6 +9,7 @@
 #include "Array2D.hpp"
 #include "image_io.h"
 #include "utility.hpp"
+#include "analyse/Hull.hpp"
 #include "analyse/MathematicalMorphology.hpp"
 #include "analyse/uvec2.hpp"
 
@@ -211,9 +212,31 @@ int main() {
             found = false;
         } while(current.x != first.x || current.y != first.y);
     }
+
     write_boolean_array_as_grayscale_image("data/analyse/outline.png", outline);
 
     /* ---- Convex Hull of pieces ---- */
+    Array2D<bool> pieces_hull(width, height, false);
+    Hull hull{};
+    for(const auto& [label, position] : labelPositions) {
+        unsigned int w = 1 + position.maxX - position.minX;
+        unsigned int h = 1 + position.maxY - position.minY;
+        Array2D<bool> piece_outline(w, h, false);
+
+        for (unsigned int x = 0; x < w; ++x) {
+            for (unsigned int y = 0; y < h; ++y) {
+                piece_outline(x,y) = outline(position.minX + x, position.minY + y);
+            }
+        }
+        Array2D<bool> piece_hull = hull.do_hull(piece_outline);
+
+        for (unsigned int x = 0; x < w; ++x) {
+            for (unsigned int y = 0; y < h; ++y) {
+                pieces_hull(position.minX + x, position.minY + y) = piece_hull(x, y);
+            }
+        }
+    }
+    write_boolean_array_as_grayscale_image("data/analyse/hull.png", pieces_hull);
 
 
 
@@ -221,6 +244,7 @@ int main() {
     std::filesystem::create_directory("data/analyse/pieces");
     std::filesystem::create_directory("data/analyse/piece-masks");
     std::filesystem::create_directory("data/analyse/piece-outlines");
+    std::filesystem::create_directory("data/analyse/piece-hull");
 
     unsigned int num_piece = 1;
     for(const auto& [label, position] : labelPositions) {
@@ -231,12 +255,14 @@ int main() {
         Image piece(w + 2 * padding, h + 2 * padding, background);
         Image piece_mask(w + 2 * padding, h + 2 * padding, White());
         Image piece_outline(w + 2 * padding, h + 2 * padding, Black());
+        Image piece_hull(w + 2 * padding, h + 2 * padding, Black());
 
         for(unsigned int j = 0 ; j < h ; ++j) {
             for(unsigned int i = 0 ; i < w ; ++i) {
                 piece(i + padding, j + padding) = puzzle(i + position.minX, j + position.minY);
                 piece_mask(i + padding, j + padding) = Color(binaryMask(i + position.minX, j + position.minY));
                 piece_outline(i + padding, j + padding) = Color(outline(i + position.minX, j + position.minY));
+                piece_hull(i + padding, j + padding) = Color(pieces_hull(i + position.minX, j + position.minY));
             }
         }
 
@@ -245,6 +271,7 @@ int main() {
         write_image_png(srgb(piece), ("data/analyse/pieces/piece-" + strNum + ".png").c_str(), false);
         write_image_png(srgb(piece_mask), ("data/analyse/piece-masks/piece-mask-" + strNum + ".png").c_str(), false);
         write_image_png(srgb(piece_outline), ("data/analyse/piece-outlines/piece-outlines-" + strNum + ".png").c_str(), false);
+        write_image_png(srgb(piece_hull), ("data/analyse/piece-hull/piece-hull-" + strNum + ".png").c_str(), false);
 
         ++num_piece;
     }

@@ -49,11 +49,11 @@ Array2D<Type>::Array2D(unsigned int rows, unsigned int columns, Type value)
 
 template <typename Type>
 Array2D<Type>::~Array2D() {
-    for(unsigned int i = 0 ; i < columns ; ++i) {
+    for(unsigned int i = 0 ; i < rows ; ++i) {
         delete[] data[i];
     }
 
-    delete data;
+    delete[] data;
 }
 
 template <typename Type>
@@ -78,7 +78,7 @@ Array2D<Type>& Array2D<Type>::operator=(const Array2D& array) {
         }
     } else {
         if(data != nullptr) {
-            for(unsigned int i = 0 ; i < columns ; ++i) {
+            for(unsigned int i = 0 ; i < rows ; ++i) {
                 delete[] data[i];
             }
             delete data;

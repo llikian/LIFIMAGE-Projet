@@ -15,4 +15,6 @@ struct uvec2 {
 
     uvec2();
     uvec2(unsigned int x, unsigned int y);
+    bool operator==(const uvec2& a) const;
+    bool operator!=(const uvec2& a) const;
 };

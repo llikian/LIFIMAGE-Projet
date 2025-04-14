@@ -38,6 +38,7 @@ add_executable(Analyse src/analyse.cpp
         ${SOURCES}
         src/analyse/MathematicalMorphology.cpp
         src/analyse/uvec2.cpp
+        src/analyse/Hull.cpp
 )
 target_include_directories(Analyse PUBLIC ${INCLUDES})
 
