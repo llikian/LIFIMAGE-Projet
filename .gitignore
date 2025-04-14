@@ -1,5 +1,6 @@
 .idea
 bin
+build
 build-debug
 build-release
 data/analyse/piece-masks
