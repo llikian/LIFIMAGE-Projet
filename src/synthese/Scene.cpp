@@ -25,7 +25,6 @@ Scene::~Scene() {
 }
 
 void Scene::render(unsigned int width, unsigned int height) {
-    if(objects.empty() && planes.empty()) { throw std::runtime_error("Cannot render an empty scene."); }
     if(width == 0 || height == 0) { throw std::runtime_error("Cannot render to an empty image."); }
 
     std::cout << "Rendering scene \"" << name << "\" to a " << width << " by " << height << " image.\n";
