@@ -142,11 +142,8 @@ void scene6(unsigned int width, unsigned int height) {
     scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
-    // scene.add(new DirectionalLight(White(), Vector(-2.0f, 2.0f, 1.0f)));
-    // scene.add(new DirectionalLight(White(), Vector(2.0f, -2.0f, 1.0f)));
-
-    scene.add(new PointLight(White(), Point(-1.0f, 1.0f, 1.0f), 4.5f));
-    scene.add(new PointLight(White(), Point(1.0f, -1.0f, 1.0f), 4.5f));
+    scene.add(new PointLight(White(), Point(-1.0f, 1.0f, 1.0f), 5.0f));
+    scene.add(new PointLight(White(), Point(1.0f, -1.0f, 1.0f), 5.0f));
 
     /* ---- Objects ---- */
     MeshIOData suzanne;
@@ -213,16 +210,36 @@ void scene8(unsigned int width, unsigned int height) {
     scene.render(width, height);
 }
 
+void testScene(unsigned int width, unsigned int height) {
+    Scene scene("00 - Tests");
+
+    /* ---- Sky ---- */
+    scene.setLowSkyColor(0.3f, 0.3f, 0.3f);
+    scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
+
+    /* ---- Lights ---- */
+    scene.add(new DirectionalLight(White(), Vector(0.0f, 2.0f, 1.0f)));
+
+    /* ---- Objects ---- */
+    scene.add(new Plane(Blue(), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+    scene.add(new Sphere(Red(), Point(-1.0f, 0.5f, -3.0f), 1.0f));
+    scene.add(new Triangle(Green(), Point(0.5f, 1.0f, -3.0f), Point(1.5f, -0.5f, -3.0f), Point(2.5f, 1.0f, -3.0f)));
+
+    scene.render(width, height);
+}
+
 int main() {
     try {
-        scene1(1024, 512);
-        scene2(1024, 512);
-        scene3(1024, 512);
-        scene4(1024, 512);
-        scene5(1024, 512);
-        scene6(768, 512);
-        scene7(4096, 4096);
-        scene8(1024, 1024);
+        // scene1(1024, 512);
+        // scene2(1024, 512);
+        // scene3(1024, 512);
+        // scene4(1024, 512);
+        // scene5(1024, 512);
+        // scene6(768, 512);
+        // scene7(4096, 4096);
+        // scene8(1024, 1024);
+
+        testScene(512, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;

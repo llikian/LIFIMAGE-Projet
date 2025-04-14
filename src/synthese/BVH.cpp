@@ -25,6 +25,8 @@ void BVH::initialize() {
     usedNodes = 1;
     rootIndex = 0;
 
+    if(objects.empty()) { return; }
+
     for(uint i = 0 ; i < objects.size() ; ++i) { objectIndices.push_back(i); }
 
     nodes.reserve(objects.size() * 2 - 1);
@@ -38,6 +40,8 @@ void BVH::initialize() {
 }
 
 Hit BVH::intersect(const Ray& ray) const {
+    if(objects.empty()) { return Hit(); }
+
     return intersect(ray, rootIndex);
 }
 
