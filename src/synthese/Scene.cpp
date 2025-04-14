@@ -25,7 +25,7 @@ Scene::~Scene() {
 }
 
 void Scene::render(unsigned int width, unsigned int height) {
-    if(objects.empty()) { throw std::runtime_error("Cannot render an empty scene."); }
+    if(objects.empty() && planes.empty()) { throw std::runtime_error("Cannot render an empty scene."); }
     if(width == 0 || height == 0) { throw std::runtime_error("Cannot render to an empty image."); }
 
     std::cout << "Rendering scene \"" << name << "\" to a " << width << " by " << height << " image.\n";
@@ -45,9 +45,7 @@ void Scene::render(unsigned int width, unsigned int height) {
         threads.emplace_back(&Scene::computeImage, this, std::ref(image));
     }
 
-    for(std::thread& thread : threads) {
-        thread.join();
-    }
+    for(std::thread& thread : threads) { thread.join(); }
 
     std::chrono::duration<float> duration = std::chrono::high_resolution_clock::now() - startTime;
     std::cout << "The image took " << duration.count() << "s to compute.\n\n";
@@ -84,18 +82,19 @@ void Scene::add(const std::string& meshPath, const mat4& transform, const Color&
 }
 
 void Scene::add(const MeshIOData& data, const mat4& transform, const ColorFunc& getColor, bool smooth) {
-    if(smooth) { } else {
-        add(data.positions, data.indices, transform, getColor);
-    }
-    for(unsigned int i = 0 ; i + 2 < data.indices.size() ; i += 3) {
-        unsigned int index0 = data.indices.at(i);
-        unsigned int index1 = data.indices.at(i + 1);
-        unsigned int index2 = data.indices.at(i + 2);
+    if(smooth) {
+        for(unsigned int i = 0 ; i + 2 < data.indices.size() ; i += 3) {
+            unsigned int index0 = data.indices.at(i);
+            unsigned int index1 = data.indices.at(i + 1);
+            unsigned int index2 = data.indices.at(i + 2);
 
-        add(new MeshTriangle(getColor,
-                             Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
-                             Vertex(transform * data.positions.at(index1), data.normals.at(index1)),
-                             Vertex(transform * data.positions.at(index2), data.normals.at(index2))));
+            add(new MeshTriangle(getColor,
+                                 Vertex(transform * data.positions.at(index0), data.normals.at(index0)),
+                                 Vertex(transform * data.positions.at(index1), data.normals.at(index1)),
+                                 Vertex(transform * data.positions.at(index2), data.normals.at(index2))));
+        }
+    } else {
+        add(data.positions, data.indices, transform, getColor);
     }
 }
 

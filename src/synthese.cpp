@@ -15,13 +15,15 @@ void scene1(unsigned int width, unsigned int height) {
     Scene scene("01 - Sphere and Plane");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(-4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(4.0f, 6.0f, 1.0f)));
 
     /* ---- Objects ---- */
     scene.add(new Plane([](const Point& point) {
         return std::fmod(floor(point.x) + floor(point.z), 2.0f) == 0.0f ? White() : Black(); // Checker
-    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f))); {
+    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+
+    /* Sphere */ {
         Point center(0.0f, 0.0f, -3.0f);
         scene.add(new Sphere([center](const Point& point) {
             Vector v = (normalize(point - center) + Vector(1.0f, 1.0f, 1.0f)) / 2.0f;
@@ -57,12 +59,14 @@ void scene3(unsigned int width, unsigned int height) {
     Scene scene("03 - Cubes");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(-4.0f, 6.0f, 1.0f)));
 
     /* ---- Objects ---- */
     scene.add(new Plane([](const Point& point) {
         return std::fmod(floor(point.x) + floor(point.z), 2.0f) == 0.0f ? White() : Black(); // Checker
-    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f))); {
+    }, Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+
+    /* Cubes */ {
         std::vector<Point> positions;
         read_positions("data/synthese/cube.obj", positions);
 
@@ -78,7 +82,7 @@ void scene4(unsigned int width, unsigned int height) {
     Scene scene("04 - Weird Spheres");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 4.0f)));
+    scene.add(new DirectionalLight(White(), Vector(-4.0f, 6.0f, 4.0f)));
 
     /* ---- Objects ---- */
     scene.add(new Plane([](const Point& point) {
@@ -120,8 +124,8 @@ void scene5(unsigned int width, unsigned int height) {
     Scene scene("05 - Dodecahedron and Cube");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-4.0f, 6.0f, 1.0f)));
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(-4.0f, 6.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(4.0f, 6.0f, 1.0f)));
 
     /* ---- Objects ---- */
     scene.add("data/synthese/dodecahedron.obj", translate(-2.0f, 0.0f, -4.0f).scale(2.0f), White());
@@ -138,8 +142,8 @@ void scene6(unsigned int width, unsigned int height) {
     scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(-2.0f, 2.0f, 1.0f)));
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(2.0f, -2.0f, 1.0f)));
+    scene.add(new PointLight(White(), Point(-1.0f, 1.0f, 1.0f), 5.0f));
+    scene.add(new PointLight(White(), Point(1.0f, -1.0f, 1.0f), 5.0f));
 
     /* ---- Objects ---- */
     MeshIOData suzanne;
@@ -155,7 +159,7 @@ void scene7(unsigned int width, unsigned int height) {
     Scene scene("07 - Sphere Rings");
 
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(0.0f, 0.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(0.0f, 0.0f, 1.0f)));
 
     /* ---- Objects ---- */
     /* Sphere Rings */ {
@@ -187,14 +191,12 @@ void scene7(unsigned int width, unsigned int height) {
 void scene8(unsigned int width, unsigned int height) {
     Scene scene("08 - Let There Be Dragons");
 
-    /* ---- Sky ---- */
-    scene.setLowSkyColor(0.3f, 0.3f, 0.3f);
-    scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
-
     /* ---- Lights ---- */
-    scene.add(new DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector(0.0f, 2.0f, 1.0f)));
+    scene.add(new DirectionalLight(White(), Vector(0.0f, 2.0f, 1.0f)));
 
     /* ---- Objects ---- */
+    scene.add(new Plane(Color(0.3f, 0.3f, 0.3f), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+
     std::vector<Point> dragon;
     std::vector<uint> indices;
     read_indexed_positions("data/synthese/dragon80k.obj", dragon, indices);
@@ -202,22 +204,42 @@ void scene8(unsigned int width, unsigned int height) {
     scene.add(dragon, indices, translate(0.0f, 0.75f, -4.0f).scale(6.0f).rotateY(75.0f), [](const Point& point) {
         return lerp(White(), Color(0.922f, 0.216f, 0.216f), std::clamp(point.y / 2.0f, 0.0f, 1.0f));
     });
-    scene.add(dragon, indices, translate(-0.5f, -0.75f, -1.5f).scale(1.5f).rotateY(-75.0f), Color(0.3f, 0.3f, 1.0f));
+    scene.add(dragon, indices, translate(-0.5f, -0.5f, -1.5f).scale(1.5f).rotateY(-75.0f), Color(0.3f, 0.3f, 1.0f));
     scene.add(dragon, indices, translate(0.5f, -0.75f, -1.2f).scale(0.5f).rotateY(75.0f), Color(0.3f, 1.0f, 0.5f));
+
+    scene.render(width, height);
+}
+
+void testScene(unsigned int width, unsigned int height) {
+    Scene scene("00 - Tests");
+
+    /* ---- Sky ---- */
+    scene.setLowSkyColor(0.3f, 0.3f, 0.3f);
+    scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
+
+    /* ---- Lights ---- */
+    scene.add(new DirectionalLight(White(), Vector(0.0f, 2.0f, 1.0f)));
+
+    /* ---- Objects ---- */
+    scene.add(new Plane(Blue(), Point(0.0f, -1.0f, 0.0f), Vector(0.0f, 1.0f, 0.0f)));
+    scene.add(new Sphere(Red(), Point(-1.0f, 0.5f, -3.0f), 1.0f));
+    scene.add(new Triangle(Green(), Point(0.5f, 1.0f, -3.0f), Point(1.5f, -0.5f, -3.0f), Point(2.5f, 1.0f, -3.0f)));
 
     scene.render(width, height);
 }
 
 int main() {
     try {
-        scene1(1024, 512);
-        scene2(1024, 512);
-        scene3(1024, 512);
-        scene4(1024, 512);
-        scene5(1024, 512);
-        scene6(768, 512);
-        scene7(4096, 4096);
-        scene8(1024, 1024);
+        // scene1(1024, 512);
+        // scene2(1024, 512);
+        // scene3(1024, 512);
+        // scene4(1024, 512);
+        // scene5(1024, 512);
+        // scene6(768, 512);
+        // scene7(4096, 4096);
+        // scene8(1024, 1024);
+
+        testScene(512, 512);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;
