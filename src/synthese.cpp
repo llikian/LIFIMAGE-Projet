@@ -142,8 +142,8 @@ void scene6(unsigned int width, unsigned int height) {
     scene.setHighSkyColor(0.1f, 0.1f, 0.1f);
 
     /* ---- Lights ---- */
-    scene.add(new PointLight(White(), Point(-1.0f, 1.0f, 1.0f), 5.0f));
-    scene.add(new PointLight(White(), Point(1.0f, -1.0f, 1.0f), 5.0f));
+    scene.add(new PointLight(White(), Point(-1.0f, 1.0f, 1.0f), 4.0f));
+    scene.add(new PointLight(White(), Point(1.0f, -1.0f, 1.0f), 4.0f));
 
     /* ---- Objects ---- */
     MeshIOData suzanne;
@@ -212,14 +212,14 @@ void scene8(unsigned int width, unsigned int height) {
 
 int main() {
     try {
-        scene1(1024, 512);
-        scene2(1024, 512);
-        scene3(1024, 512);
-        scene4(1024, 512);
-        scene5(1024, 512);
+        // scene1(1024, 512);
+        // scene2(1024, 512);
+        // scene3(1024, 512);
+        // scene4(1024, 512);
+        // scene5(1024, 512);
         scene6(768, 512);
-        scene7(4096, 4096);
-        scene8(1024, 1024);
+        // scene7(4096, 4096);
+        // scene8(1024, 1024);
     } catch(const std::exception& exception) {
         std::cerr << "ERROR : " << exception.what() << '\n';
         return -1;
