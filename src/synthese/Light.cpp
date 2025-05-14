@@ -6,6 +6,8 @@
 #include "synthese/Light.hpp"
 
 #include <cmath>
+
+#include "utility.hpp"
 #include "synthese/Scene.hpp"
 
 Light::Light(const Color& color) : color(color) { }
@@ -46,8 +48,9 @@ Color PointLight::calculate(const Hit& hit, const Point& point, const Scene* sce
 
     if(isInShadow(hit.object, ray, scene)) { return Black(); }
 
-    float attenuation = 1.0f - std::clamp(distance / radius, 0.0f, 1.0f);
+    float windowing = pow2(std::max(1.0f - pow2(distance / radius), 0.0f));
+    float attenuation = windowing * (pow2(radius) / (pow2(distance) + radius));
     float cos_theta = std::max(dot(hit.normal, ray.direction), 0.0f);
 
-    return color * attenuation * cos_theta;
+    return color * (attenuation * cos_theta);
 }
